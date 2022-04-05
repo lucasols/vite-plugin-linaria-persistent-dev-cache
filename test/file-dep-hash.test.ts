@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { resetCodeDepsCache } from "../src/file-dep-hash";
+import { getSortedImports } from './utils/getSortedImports';
 import { getPrivateFileDepHash } from "./utils/setup";
 
 beforeEach(() => {
@@ -11,9 +12,9 @@ describe("get the correct deps for a file", () => {
 
   test("Table deps", () => {
     tableResult = getPrivateFileDepHash("./src/components/Table/Table.tsx");
-    expect(tableResult.importsMap.length).toEqual(727);
+    expect(tableResult.importsMap.length).toEqual(726);
 
-    expect(tableResult.importsMap.map((item) => item.fileId)).toMatchSnapshot();
+    expect(getSortedImports(tableResult.importsMap)).toMatchSnapshot();
   });
 
   test("result import values are not equal", () => {
@@ -27,7 +28,7 @@ describe("get the correct deps for a file", () => {
 
     expect(result.importsMap.length).toEqual(6);
 
-    expect(result.importsMap.map((item) => item.fileId)).toMatchSnapshot();
+    expect(getSortedImports(result.importsMap)).toMatchSnapshot();
   });
 
   test("MoreMenu deps", () => {
@@ -35,6 +36,6 @@ describe("get the correct deps for a file", () => {
 
     expect(result.importsMap.length).toEqual(29);
 
-    expect(result.importsMap.map((item) => item.fileId)).toMatchSnapshot();
+    expect(getSortedImports(result.importsMap)).toMatchSnapshot();
   });
 });
