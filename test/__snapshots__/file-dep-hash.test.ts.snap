@@ -1,0 +1,46 @@
+// Vitest Snapshot v1
+
+exports[`get the correct deps for a file > Dropdown deps 1`] = `
+[
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/typings/index.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/PopoverLayer.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/PortalLayer.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/hooks/useDelayValueUpdate.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/hooks/useTimeout.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/hooks/useOnClickOutside.ts",
+]
+`;
+
+exports[`get the correct deps for a file > MoreMenu deps 1`] = `
+[
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/i18n/i18n.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/getCacheId.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/isObject.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/ButtonElement.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Dropdown/Dropdown.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/typings/index.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/PopoverLayer.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/PortalLayer.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/hooks/useDelayValueUpdate.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/hooks/useTimeout.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/hooks/useOnClickOutside.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Dropdown/DropdownContainer.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/style/theme.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/createTheme.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/appContainer.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/css.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/isNodeEnv.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/toCSS.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/style/helpers/transition.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/cx.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/style/helpers/show.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/style/helpers/hide.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Icon.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/utils/parseUnit.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/config/icons.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/style/helpers/fillContainer.ts",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Tooltip.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/LazyTippy.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/style/helpers/centerContent.ts",
+]
+`;
