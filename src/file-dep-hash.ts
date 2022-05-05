@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
+import { sortBy } from "../test/utils/sortBy";
 
 function generateStringHash(str: string) {
   return crypto.createHash("sha1").update(str).digest("hex");
@@ -19,8 +20,8 @@ function getImportsFromCode(code: string, include: RegExp[]) {
   const imports: string[] = [];
 
   for (const [_, path] of allPossibleImports) {
-    if (include.some((pattern) => pattern.test(path))) {
-      imports.push(path);
+    if (include.some((pattern) => pattern.test(path!))) {
+      imports.push(path!);
     }
   }
 
@@ -48,6 +49,8 @@ function getResolvedPath(
 
   normalizedPath = path.posix.join(rootDir, normalizedPath);
 
+  // FIX: change order based on file name casing, ex: ReactComp -> .tsx
+
   const testSuffix = [".tsx", ".ts", "/index.tsx", "/index.ts"];
 
   for (const suffix of testSuffix) {
@@ -73,11 +76,16 @@ const codeDepsCache = new Map<
 >();
 const codeDepsCacheFilesIds = new Set<string>();
 
+export function getCodeDepsCache() {
+  return codeDepsCache;
+}
+
 type Debug = {
   cached: number;
   notCached: number;
   addedToCache: number;
   timing: number;
+  getAllCodeDepsCalls: number;
 };
 
 function getAllCodeDeps(
@@ -87,20 +95,31 @@ function getAllCodeDeps(
   rootDir: string,
   aliases: Aliases,
   debug: Debug,
-  allDepsFileIds: Set<string> = new Set()
-): CodeDependency[] {
+  rootFileInfo = {
+    fileId: fileId,
+    imports: new Set<string>(),
+  },
+  deep = 0
+): { deps: CodeDependency[]; skipedSomeImport: boolean } {
+  debug.getAllCodeDepsCalls++;
+
   if (codeDepsCache.has(fileId)) {
     debug.cached++;
-    return codeDepsCache.get(fileId)!.deps;
+    return { deps: codeDepsCache.get(fileId)!.deps, skipedSomeImport: false };
   }
 
   const codeImports = getImportsFromCode(code, include);
   const deps = new Map<string, CodeDependency>();
 
-  allDepsFileIds.add(fileId);
+  let skipedSomeImport = false;
 
   for (const importPath of codeImports) {
     if (deps.has(importPath)) {
+      continue;
+    }
+
+    if (rootFileInfo.imports.has(importPath)) {
+      skipedSomeImport = true;
       continue;
     }
 
@@ -110,11 +129,12 @@ function getAllCodeDeps(
       continue;
     }
 
-    if (allDepsFileIds.has(resolvedFiledId)) {
+    if (rootFileInfo.fileId === resolvedFiledId) {
+      skipedSomeImport = true;
       continue;
     }
 
-    allDepsFileIds.add(resolvedFiledId);
+    rootFileInfo.imports.add(importPath);
 
     const code = fs.readFileSync(resolvedFiledId, "utf8");
 
@@ -127,10 +147,15 @@ function getAllCodeDeps(
       rootDir,
       aliases,
       debug,
-      allDepsFileIds
+      rootFileInfo,
+      deep + 1
     );
 
-    for (const importResult of importDeps) {
+    if (importDeps.skipedSomeImport && deep > 0) {
+      skipedSomeImport = true;
+    }
+
+    for (const importResult of importDeps.deps) {
       deps.set(importResult.importPath, importResult);
     }
   }
@@ -143,17 +168,18 @@ function getAllCodeDeps(
     depsArray.push(dependency);
   }
 
-  // if (codeImports.length === 0) {
-  //   debug.addedToCache++;
-  //   codeDepsCache.set(fileId, {
-  //     deps: [],
-  //     depsId: new Set(),
-  //   });
-  // }
+  if (!skipedSomeImport) {
+    debug.addedToCache++;
+
+    codeDepsCache.set(fileId, {
+      deps: depsArray,
+      depsId: depsId,
+    });
+  }
 
   debug.notCached++;
 
-  return depsArray;
+  return { deps: depsArray, skipedSomeImport };
 }
 
 function cleanCodeDepsCacheForFile(fileId: string) {
@@ -180,13 +206,18 @@ export function getCodeHash(
   include: RegExp[],
   aliases: Aliases,
   rootDir: string
-) {
+): {
+  hash: string;
+  importsMap: CodeDependency[];
+  debug: Debug;
+} {
   // FIX: make debug optional
   const debug: Debug = {
     cached: 0,
     notCached: 0,
     addedToCache: 0,
     timing: 0,
+    getAllCodeDepsCalls: 0,
   };
 
   const start = Date.now();
@@ -204,7 +235,7 @@ export function getCodeHash(
 
   let importsHash = "";
 
-  for (const { code, fileId } of importsMap) {
+  for (const { code, fileId } of importsMap.deps) {
     importsHash += generateStringHash(`${fileId}||${code}`);
   }
 
@@ -212,7 +243,7 @@ export function getCodeHash(
 
   return {
     hash: `${codeHash}||${generateStringHash(importsHash)}`,
-    importsMap,
+    importsMap: importsMap.deps,
     debug,
   };
 }

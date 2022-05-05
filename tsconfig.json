@@ -13,12 +13,9 @@
     "noImplicitReturns": true,
     "noImplicitAny": true,
     "alwaysStrict": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
-    "keyofStringsOnly": true,
-
-    "baseUrl": ".",
-    "paths": {
-      "@src/*": ["src/*"]
-    }
-  },
+    "keyofStringsOnly": true
+  }
 }

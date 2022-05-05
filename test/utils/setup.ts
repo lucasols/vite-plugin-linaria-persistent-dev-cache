@@ -25,8 +25,7 @@ export function getPrivateFileDepHash(file: string) {
   return result;
 }
 
-export function getPublicFileDepHash(file: string) {
-  const root = "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public";
+export function getFileDepHash(file: string, root: string) {
   const fileId = path.posix.join(root, file);
 
   const code = fs.readFileSync(fileId, "utf-8");

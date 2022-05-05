@@ -1,15 +1,53 @@
 // Vitest Snapshot v1
 
-exports[`circular dependency 1`] = `
+exports[`public tests > circular dependency is the main file > cache format after circular dephash calc 1`] = `
 [
-  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/src/circular/dep1.ts",
-  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/src/circular/dep2.ts",
+  {
+    "fileId": "circular/circular.tsx",
+    "imports": [
+      "circular/dep1.ts",
+      "circular/dep2.ts",
+    ],
+  },
 ]
 `;
 
-exports[`simple case 1`] = `
+exports[`public tests > circular dependency is the main file > deps are right 1`] = `
 [
-  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/src/base/dep1.ts",
-  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/src/base/dep2.ts",
+  "circular/dep1.ts",
+  "circular/dep2.ts",
+]
+`;
+
+exports[`public tests > circular dependency is the main file > simple circular dependency caching 1`] = `
+[
+  "circular/dep1.ts",
+  "circular/dep2.ts",
+]
+`;
+
+exports[`public tests > circular dependency that is not the main file > cache format after circular dephash calc 1`] = `
+[
+  {
+    "fileId": "circular2/dep1.ts",
+    "imports": [
+      "circular2/dep2.ts",
+      "circular2/dep3.tsx",
+    ],
+  },
+]
+`;
+
+exports[`public tests > circular dependency that is not the main file > deps are right 1`] = `
+[
+  "circular2/dep2.ts",
+  "circular2/dep3.tsx",
+]
+`;
+
+exports[`public tests > simple case 1`] = `
+[
+  "base/dep1.ts",
+  "base/dep2.ts",
 ]
 `;

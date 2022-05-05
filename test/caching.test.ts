@@ -4,7 +4,7 @@ import { getPrivateFileDepHash } from "./utils/setup";
 
 describe.skip("caches the deps of previous calls", () => {
   describe("Table then", () => {
-    test.only("cached files", () => {
+    test("cache files", () => {
       const tableResult = getPrivateFileDepHash(
         "./src/components/Table/Table.tsx"
       );
@@ -20,12 +20,13 @@ describe.skip("caches the deps of previous calls", () => {
         "./src/components/Table/Table.tsx"
       );
 
-      expect(tableResult2.importsMap.length).toEqual(727);
+      expect(tableResult2.debug.cached).toEqual(1);
+      expect(tableResult2.debug.notCached).toEqual(0);
+
+      expect(tableResult2.importsMap.length, "num of deps").toEqual(727);
 
       expect(tableResult2.debug.timing).toBeLessThan(50);
 
-      expect(tableResult2.debug.cached).toEqual(727);
-      expect(tableResult2.debug.notCached).toEqual(0);
     });
 
     test("Dropdown", () => {

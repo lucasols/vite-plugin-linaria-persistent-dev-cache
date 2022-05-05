@@ -11,8 +11,8 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.9",
-    "@vitest/ui": "0.8.4",
-    "vite": "2.9.1",
-    "vitest": "0.8.4"
+    "@vitest/ui": "0.10.2",
+    "vite": "2.9.7",
+    "vitest": "0.10.2"
   }
 }

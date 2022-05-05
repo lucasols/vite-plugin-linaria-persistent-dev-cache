@@ -231,6 +231,7 @@ exports[`get the correct deps for a file > Table deps 1`] = `
   "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/BodyCell.tsx",
   "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/EditCell.tsx",
   "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/HeaderCell.tsx",
+  "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/Table.tsx",
   "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/cellEditors/CellDateTimeField.tsx",
   "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/cellEditors/CellEditContainer.tsx",
   "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private/src/components/Table/cellEditors/CellEnhancedTextFieldEditor.tsx",
