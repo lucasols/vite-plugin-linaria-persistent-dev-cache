@@ -1,46 +1,46 @@
-import { beforeEach, describe, expect, test } from "vitest";
-import { resetCodeDepsCache } from "../src/file-dep-hash";
+import { beforeEach, describe, expect, test } from 'vitest'
+import { resetCodeDepsCache } from '../src/file-dep-hash'
 import {
   getSortedCodeDepsCache,
   getSortedImports,
-} from "./utils/getSortedImports";
-import { getFileDepHash } from "./utils/setup";
+} from './utils/getSortedImports'
+import { getFileDepHash } from './utils/setup'
 
-const root = "C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/";
+const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/'
 
 function getPublicFileDepHash(file: string) {
-  return getFileDepHash(file, root);
+  return getFileDepHash(file, root)
 }
 
 function getSimplifiedSortedImports(imports: { fileId: string }[]) {
-  return getSortedImports(imports, root + "src/");
+  return getSortedImports(imports, root + 'src/')
 }
 
 function getSimplifiedSortedCodeDepsCache() {
-  return getSortedCodeDepsCache(root + "src/");
+  return getSortedCodeDepsCache(root + 'src/')
 }
 
 beforeEach(() => {
-  resetCodeDepsCache();
-});
+  resetCodeDepsCache()
+})
 
-describe("public tests", () => {
-  test("simple case", () => {
-    const result = getPublicFileDepHash("./src/base/base.tsx");
+describe('public tests', () => {
+  test('simple case', () => {
+    const result = getPublicFileDepHash('./src/base/base.tsx')
 
-    expect(result.importsMap.length).toEqual(2);
+    expect(result.importsMap.length).toEqual(2)
     expect(getSimplifiedSortedImports(result.importsMap))
       .toMatchInlineSnapshot(`
       [
         "base/dep1.ts",
         "base/dep2.ts",
       ]
-    `);
-  });
+    `)
+  })
 
-  describe("caching after simple case", () => {
-    test("simple case caching", () => {
-      getPublicFileDepHash("./src/base/base.tsx");
+  describe('caching after simple case', () => {
+    test('simple case caching', () => {
+      getPublicFileDepHash('./src/base/base.tsx')
 
       expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
         [
@@ -62,44 +62,44 @@ describe("public tests", () => {
             "imports": [],
           },
         ]
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("circular dependency is the main file", () => {
-    test("deps are right", () => {
-      const result = getPublicFileDepHash("./src/circular/circular.tsx");
+  describe('circular dependency is the main file', () => {
+    test('deps are right', () => {
+      const result = getPublicFileDepHash('./src/circular/circular.tsx')
 
-      expect(result.importsMap.length).toEqual(2);
+      expect(result.importsMap.length).toEqual(2)
       expect(getSimplifiedSortedImports(result.importsMap))
         .toMatchInlineSnapshot(`
         [
           "circular/dep1.ts",
           "circular/dep2.ts",
         ]
-      `);
-    });
+      `)
+    })
 
-    test("simple circular dependency caching", () => {
-      getPublicFileDepHash("./src/circular/circular.tsx");
+    test('simple circular dependency caching', () => {
+      getPublicFileDepHash('./src/circular/circular.tsx')
 
-      const result = getPublicFileDepHash("./src/circular/circular.tsx");
+      const result = getPublicFileDepHash('./src/circular/circular.tsx')
 
-      expect(result.debug.cached).toEqual(1);
-      expect(result.importsMap.length, "num of deps").toEqual(2);
+      expect(result.debug.cached).toEqual(1)
+      expect(result.importsMap.length, 'num of deps').toEqual(2)
       expect(getSimplifiedSortedImports(result.importsMap))
         .toMatchInlineSnapshot(`
         [
           "circular/dep1.ts",
           "circular/dep2.ts",
         ]
-      `);
-    });
+      `)
+    })
 
-    test("cache format after circular dephash calc", () => {
-      const result = getPublicFileDepHash("./src/circular/circular.tsx");
+    test('cache format after circular dephash calc', () => {
+      const result = getPublicFileDepHash('./src/circular/circular.tsx')
 
-      expect(result.debug.getAllCodeDepsCalls).toEqual(3);
+      expect(result.debug.getAllCodeDepsCalls).toEqual(3)
       expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
         [
           {
@@ -110,28 +110,28 @@ describe("public tests", () => {
             ],
           },
         ]
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe("circular dependency that is not the main file", () => {
-    test("deps are right", () => {
-      const result = getPublicFileDepHash("./src/circular2/dep1.ts");
+  describe('circular dependency that is not the main file', () => {
+    test('deps are right', () => {
+      const result = getPublicFileDepHash('./src/circular2/dep1.ts')
 
-      expect(result.importsMap.length).toEqual(2);
+      expect(result.importsMap.length).toEqual(2)
       expect(getSimplifiedSortedImports(result.importsMap))
         .toMatchInlineSnapshot(`
         [
           "circular2/dep2.ts",
           "circular2/dep3.tsx",
         ]
-      `);
-    });
+      `)
+    })
 
-    test("cache format after circular dephash calc", () => {
-      const result = getPublicFileDepHash("./src/circular2/dep1.ts");
+    test('cache format after circular dephash calc', () => {
+      const result = getPublicFileDepHash('./src/circular2/dep1.ts')
 
-      expect(result.debug.getAllCodeDepsCalls).toEqual(3);
+      expect(result.debug.getAllCodeDepsCalls).toEqual(3)
       expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
         [
           {
@@ -142,9 +142,47 @@ describe("public tests", () => {
             ],
           },
         ]
-      `);
-    });
-  });
+      `)
+    })
+  })
 
-  describe.todo("multiple circular dependencies", () => {});
-});
+  describe('multiple circular dependencies in one file', () => {
+    test('cache format after circular dephash calc', () => {
+      const result = getPublicFileDepHash('./src/circular3/dep1.ts')
+
+      expect(result.importsMap.length).toEqual(4)
+      expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+        [
+          {
+            "fileId": "circular3/dep1.ts",
+            "imports": [
+              "circular3/dep2.ts",
+              "circular3/dep3.tsx",
+              "circular3/dep4.ts",
+              "circular3/dep5.ts",
+            ],
+          },
+        ]
+      `)
+    })
+
+    test('cache format after circular dephash calc 2', () => {
+      const result = getPublicFileDepHash('./src/circular4/dep1.ts')
+
+      expect(result.importsMap.length).toEqual(4)
+      expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+        [
+          {
+            "fileId": "circular4/dep1.ts",
+            "imports": [
+              "circular4/dep2.ts",
+              "circular4/dep3.tsx",
+              "circular4/dep4.ts",
+              "circular4/dep5.ts",
+            ],
+          },
+        ]
+      `)
+    })
+  })
+})
