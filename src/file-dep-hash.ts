@@ -12,9 +12,11 @@ type Aliases = {
 }[]
 
 function getImportsFromCode(code: string, include: RegExp[]) {
-  const regex = /from\s+['"]([^'"]+)['"];/g
+  const codeWithoutComments = code.replace(/\/\/.*|\/\*[^]*?\*\//g, '')
 
-  const allPossibleImports = code.matchAll(regex)
+  const regex = /from\s+['"]([^'"]+)['"]/g
+
+  const allPossibleImports = codeWithoutComments.matchAll(regex)
 
   const imports: string[] = []
 
@@ -65,7 +67,6 @@ function getResolvedPath(
 
 type CodeDependency = {
   fileId: string
-  importPath: string
   code: string
 }
 
@@ -75,7 +76,7 @@ const codeDepsCache = new Map<
 >()
 const codeDepsCacheFilesIds = new Set<string>()
 
-export function getCodeDepsCache() {
+function getCodeDepsCache() {
   return codeDepsCache
 }
 
@@ -87,6 +88,29 @@ type Debug = {
   getAllCodeDepsCalls: number
 }
 
+function getEdges(
+  code: string,
+  include: RegExp[],
+  aliases: Aliases,
+  rootDir: string,
+): string[] {
+  const imports = getImportsFromCode(code, include)
+
+  const edges: string[] = []
+
+  for (const importPath of imports) {
+    const resolvedFiledId = getResolvedPath(importPath, aliases, rootDir)
+
+    if (!resolvedFiledId) {
+      continue
+    }
+
+    edges.push(resolvedFiledId)
+  }
+
+  return edges
+}
+
 function getAllCodeDeps(
   fileId: string,
   code: string,
@@ -94,80 +118,72 @@ function getAllCodeDeps(
   rootDir: string,
   aliases: Aliases,
   debug: Debug,
-  rootFileInfo = {
-    fileId: fileId,
-    imports: new Set<string>(),
-  },
+  ancestors: string[] = [],
+  resolved = new Map<string, CodeDependency>(),
   deep = 0,
-): { deps: CodeDependency[]; skipedSomeImport: boolean } {
+): { deps: CodeDependency[]; isCircularDep: boolean } {
   debug.getAllCodeDepsCalls++
 
   if (codeDepsCache.has(fileId)) {
     debug.cached++
-    return { deps: codeDepsCache.get(fileId)!.deps, skipedSomeImport: false }
+    return { deps: codeDepsCache.get(fileId)!.deps, isCircularDep: false }
   }
 
-  const codeImports = getImportsFromCode(code, include)
-  const deps = new Map<string, CodeDependency>()
+  ancestors.push(fileId)
 
-  let skipedSomeImport = false
+  const edges = getEdges(code, include, aliases, rootDir)
 
-  for (const importPath of codeImports) {
-    if (deps.has(importPath)) {
+  let isCircularDep = false
+
+  for (const edge of edges) {
+    if (resolved.has(edge)) {
       continue
     }
 
-    if (rootFileInfo.imports.has(importPath)) {
-      skipedSomeImport = true
+    if (ancestors.includes(edge)) {
+      isCircularDep = true
       continue
     }
 
-    const resolvedFiledId = getResolvedPath(importPath, aliases, rootDir)
+    const edgeCode = fs.readFileSync(edge, 'utf8')
 
-    if (!resolvedFiledId) {
-      continue
-    }
-
-    if (rootFileInfo.fileId === resolvedFiledId) {
-      skipedSomeImport = true
-      continue
-    }
-
-    rootFileInfo.imports.add(importPath)
-
-    const code = fs.readFileSync(resolvedFiledId, 'utf8')
-
-    deps.set(importPath, { fileId: resolvedFiledId, code, importPath })
-
-    const importDeps = getAllCodeDeps(
-      resolvedFiledId,
-      code,
+    const childDeps = getAllCodeDeps(
+      edge,
+      edgeCode,
       include,
       rootDir,
       aliases,
       debug,
-      rootFileInfo,
+      ancestors,
+      resolved,
       deep + 1,
     )
 
-    if (importDeps.skipedSomeImport && deep > 0) {
-      skipedSomeImport = true
+    if (childDeps.isCircularDep && deep !== 0) {
+      isCircularDep = true
     }
 
-    for (const importResult of importDeps.deps) {
-      deps.set(importResult.importPath, importResult)
+    for (const dep of childDeps.deps) {
+      resolved.set(dep.fileId, dep)
     }
   }
+
+  ancestors.splice(ancestors.indexOf(fileId), 1)
+  resolved.set(fileId, { fileId, code })
 
   const depsArray: CodeDependency[] = []
   const depsId: Set<string> = new Set()
 
-  for (const dependency of deps.values()) {
+  for (const dependency of resolved.values()) {
+    if (dependency.fileId === fileId) {
+      continue
+    }
+
     depsId.add(dependency.fileId)
     depsArray.push(dependency)
   }
 
-  if (!skipedSomeImport) {
+  if (!isCircularDep) {
     debug.addedToCache++
 
     codeDepsCache.set(fileId, {
@@ -178,7 +194,7 @@ function getAllCodeDeps(
 
   debug.notCached++
 
-  return { deps: depsArray, skipedSomeImport }
+  return { deps: depsArray, isCircularDep }
 }
 
 function cleanCodeDepsCacheForFile(fileId: string) {
@@ -247,7 +263,13 @@ export function getCodeHash(
   }
 }
 
-export function resetCodeDepsCache() {
+function resetCodeDepsCache() {
   codeDepsCache.clear()
   codeDepsCacheFilesIds.clear()
+}
+
+export const testOnly = {
+  getImportsFromCode,
+  getCodeDepsCache,
+  resetCodeDepsCache,
 }

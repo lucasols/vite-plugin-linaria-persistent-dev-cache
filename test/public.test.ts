@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest'
-import { resetCodeDepsCache } from '../src/file-dep-hash'
+import { testOnly } from '../src/file-dep-hash'
 import {
   getSortedCodeDepsCache,
   getSortedImports,
@@ -21,7 +21,7 @@ function getSimplifiedSortedCodeDepsCache() {
 }
 
 beforeEach(() => {
-  resetCodeDepsCache()
+  testOnly.resetCodeDepsCache()
 })
 
 describe('public tests', () => {
@@ -166,7 +166,7 @@ describe('public tests', () => {
       `)
     })
 
-    test('cache format after circular dephash calc 2', () => {
+    test.only('cache format after circular dephash calc 2', () => {
       const result = getPublicFileDepHash('./src/circular4/dep1.ts')
 
       expect(result.importsMap.length).toEqual(4)
@@ -184,5 +184,67 @@ describe('public tests', () => {
         ]
       `)
     })
+  })
+
+  test('do not consider reimporting a file in child a circular dep', () => {
+    const result = getPublicFileDepHash('./src/circular5/Dropdown.ts')
+
+    expect(getSimplifiedSortedImports(result.importsMap))
+      .toMatchInlineSnapshot(`
+      [
+        "circular5/Popover.ts",
+        "circular5/PortalLayer.ts",
+        "circular5/typings.ts",
+        "circular5/useDelayValueUpdate.ts",
+        "circular5/useOnClickOutiside.ts",
+        "circular5/useTimeout.ts",
+      ]
+    `)
+
+    expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+      [
+        {
+          "fileId": "circular5/Dropdown.ts",
+          "imports": [
+            "circular5/Popover.ts",
+            "circular5/PortalLayer.ts",
+            "circular5/typings.ts",
+            "circular5/useDelayValueUpdate.ts",
+            "circular5/useOnClickOutiside.ts",
+            "circular5/useTimeout.ts",
+          ],
+        },
+        {
+          "fileId": "circular5/Popover.ts",
+          "imports": [
+            "circular5/PortalLayer.ts",
+          ],
+        },
+        {
+          "fileId": "circular5/PortalLayer.ts",
+          "imports": [],
+        },
+        {
+          "fileId": "circular5/typings.ts",
+          "imports": [],
+        },
+        {
+          "fileId": "circular5/useDelayValueUpdate.ts",
+          "imports": [
+            "circular5/useTimeout.ts",
+          ],
+        },
+        {
+          "fileId": "circular5/useOnClickOutiside.ts",
+          "imports": [],
+        },
+        {
+          "fileId": "circular5/useTimeout.ts",
+          "imports": [
+            "circular5/typings.ts",
+          ],
+        }
+      ]
+    `)
   })
 })
