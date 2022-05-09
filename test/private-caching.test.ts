@@ -46,7 +46,7 @@ describe('caches the deps of previous calls', () => {
 
       console.log('second call', tableResult2.debug.timing)
 
-      expect(tableResult2.debug.timing).toBeLessThan(20)
+      expect(tableResult2.debug.timing).toBeLessThan(30)
     })
 
     test('Dropdown', () => {
