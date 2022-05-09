@@ -56,8 +56,52 @@ test('circular dep calc', () => {
 
   expect(getDFSStableCache()).toStrictEqual([
     { fileId: 'circular', imports: ['dep1', 'dep2'] },
-    { fileId: 'dep1', imports: 'circular' },
-    { fileId: 'dep2', imports: 'circular' },
+    { fileId: 'dep1', imports: false },
+    { fileId: 'dep2', imports: false },
+  ])
+})
+
+test.todo('circular dep cache', () => {
+  const result = deepFirstSearch(
+    {
+      circular: ['dep1'],
+      dep1: ['dep2', 'dep3'],
+      dep3: [],
+      dep2: ['circular'],
+    },
+    'circular',
+  )
+
+  expect(result).toMatchInlineSnapshot(`
+    Map {
+      "dep2" => {
+        "circular": Set {
+          "circular",
+        },
+        "deps": Set {},
+      },
+      "dep1" => {
+        "circular": Set {
+          "dep2",
+        },
+        "deps": Set {
+          "dep3",
+        },
+      },
+      "circular" => {
+        "circular": Set {
+          "dep1",
+        },
+        "deps": Set {},
+      },
+    }
+  `)
+
+  expect(getDFSStableCache()).toStrictEqual([
+    { fileId: 'circular', imports: ['dep1', 'dep2', 'dep3'] },
+    { fileId: 'dep1', imports: ['circular', 'dep2', 'dep3'] },
+    { fileId: 'dep2', imports: ['circular', 'dep1', 'dep3'] },
+    { fileId: 'dep3', imports: [] },
   ])
 })
 
@@ -73,8 +117,8 @@ test('circular 2', () => {
 
   expect(getDFSStableCache()).toStrictEqual([
     { fileId: 'dep1', imports: ['dep2', 'dep3'] },
-    { fileId: 'dep2', imports: 'circular' },
-    { fileId: 'dep3', imports: 'circular' },
+    { fileId: 'dep2', imports: false },
+    { fileId: 'dep3', imports: false },
   ])
 })
 
@@ -92,10 +136,10 @@ test('circular 3', () => {
 
   expect(getDFSStableCache()).toStrictEqual([
     { fileId: 'dep1', imports: ['dep2', 'dep3', 'dep4', 'dep5'] },
-    { fileId: 'dep2', imports: 'circular' },
-    { fileId: 'dep3', imports: 'circular' },
-    { fileId: 'dep4', imports: 'circular' },
-    { fileId: 'dep5', imports: 'circular' },
+    { fileId: 'dep2', imports: false },
+    { fileId: 'dep3', imports: false },
+    { fileId: 'dep4', imports: false },
+    { fileId: 'dep5', imports: false },
   ])
 })
 
@@ -113,10 +157,10 @@ test('circular 4', () => {
 
   expect(getDFSStableCache()).toStrictEqual([
     { fileId: 'dep1', imports: ['dep2', 'dep3', 'dep4', 'dep5'] },
-    { fileId: 'dep2', imports: 'circular' },
-    { fileId: 'dep3', imports: 'circular' },
-    { fileId: 'dep4', imports: 'circular' },
-    { fileId: 'dep5', imports: 'circular' },
+    { fileId: 'dep2', imports: false },
+    { fileId: 'dep3', imports: false },
+    { fileId: 'dep4', imports: false },
+    { fileId: 'dep5', imports: false },
   ])
 })
 

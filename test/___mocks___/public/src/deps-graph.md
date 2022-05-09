@@ -66,3 +66,12 @@ flowchart LR
   Dep1 --> Dep2 --> Dep3
   Dep1 --> Dep4 --> Dep5
 ```
+
+# Circular dep cache
+
+```mermaid
+flowchart LR
+  circular --> dep1
+  dep1 --> dep2 & dep3
+  dep2 --> circular
+```

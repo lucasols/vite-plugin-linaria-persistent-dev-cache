@@ -31,7 +31,7 @@ export function getSortedCodeDepsCache(root: string) {
   return sortBy(deps, (dep) => dep.fileId)
 }
 
-type FileEntry = { fileId: string; imports: string[] | 'circular' }
+type FileEntry = { fileId: string; imports: string[] | false }
 
 export function getDFSStableCache(): FileEntry[] {
   const files: FileEntry[] = []
@@ -41,7 +41,7 @@ export function getDFSStableCache(): FileEntry[] {
   for (const [fileId, deps] of cache) {
     files.push({
       fileId,
-      imports: typeof deps === 'string' ? deps : sortBy([...deps], (i) => i),
+      imports: deps && sortBy([...deps], (i) => i),
     })
   }
 

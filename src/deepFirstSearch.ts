@@ -1,6 +1,6 @@
 export type Graph = Record<string, string[]>
 
-const resolvedCache = new Map<string, Set<string> | 'circular'>()
+const resolvedCache = new Map<string, Set<string> | false>()
 
 type DeepFirstSearchResult = {
   deps: Set<string>
@@ -40,7 +40,7 @@ export function deepFirstSearch(
         deepth + 1,
       ).hasCircularDep
     } else {
-      edgeHasCircularDep = resolvedCache.get(edge) === 'circular'
+      edgeHasCircularDep = resolvedCache.get(edge) === false
     }
 
     if (edgeHasCircularDep) {
@@ -63,7 +63,7 @@ export function deepFirstSearch(
     if (deepth === 0) {
       resolvedCache.set(startNode, visited)
     } else {
-      resolvedCache.set(startNode, 'circular')
+      resolvedCache.set(startNode, false)
     }
   } else {
     resolvedCache.set(startNode, deps)
