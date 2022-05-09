@@ -16,15 +16,17 @@ export function getSortedImports(
 export function getSortedCodeDepsCache(root: string) {
   const codeDepsCache = testOnly.getCodeDepsCache()
 
-  const deps: { fileId: string; imports: string[] }[] = []
+  const deps: { fileId: string; imports: string[] | false }[] = []
 
   for (const [fileId, cacheEntry] of codeDepsCache.entries()) {
     deps.push({
       fileId: fileId.replace(root, ''),
-      imports: sortBy(
-        [...cacheEntry.depsId.values()].map((item) => item.replace(root, '')),
-        (dep) => dep,
-      ),
+      imports:
+        cacheEntry &&
+        sortBy(
+          [...cacheEntry.depsId.values()].map((item) => item.replace(root, '')),
+          (dep) => dep,
+        ),
     })
   }
 

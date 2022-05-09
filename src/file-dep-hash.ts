@@ -72,7 +72,7 @@ type CodeDependency = {
 
 const codeDepsCache = new Map<
   string,
-  { deps: CodeDependency[]; depsId: Set<string> }
+  { deps: CodeDependency[]; depsId: Set<string> } | false
 >()
 const codeDepsCacheFilesIds = new Set<string>()
 
@@ -111,6 +111,25 @@ function getEdges(
   return edges
 }
 
+function mergeEdgeDeps(
+  edge: string,
+  deps: Set<string>,
+  codeCache: Map<string, string>,
+) {
+  const cacheEntry = codeDepsCache.get(edge)
+
+  if (!cacheEntry) {
+    return
+  }
+
+  const edgeDeps = cacheEntry.deps
+
+  for (const dep of edgeDeps) {
+    deps.add(dep.fileId)
+    codeCache.set(dep.fileId, dep.code)
+  }
+}
+
 function getAllCodeDeps(
   fileId: string,
   code: string,
@@ -118,83 +137,122 @@ function getAllCodeDeps(
   rootDir: string,
   aliases: Aliases,
   debug: Debug,
-  ancestors: string[] = [],
-  resolved = new Map<string, CodeDependency>(),
-  deep = 0,
-): { deps: CodeDependency[]; isCircularDep: boolean } {
+  visited: Set<string> = new Set(),
+  inPath: Set<string> = new Set(),
+  codeCache: Map<string, string> = new Map(),
+  deepth = 0,
+): { deps: CodeDependency[]; hasCircularDep: boolean } {
   debug.getAllCodeDepsCalls++
 
-  if (codeDepsCache.has(fileId)) {
+  const cachedValue = codeDepsCache.get(fileId)
+
+  if (cachedValue) {
     debug.cached++
-    return { deps: codeDepsCache.get(fileId)!.deps, isCircularDep: false }
+    return { deps: cachedValue.deps, hasCircularDep: false }
   }
 
-  ancestors.push(fileId)
+  visited.add(fileId)
+  codeCache.set(fileId, code)
+  inPath.add(fileId)
 
   const edges = getEdges(code, include, aliases, rootDir)
 
-  let isCircularDep = false
+  const deps = new Set<string>()
+
+  let hasCircularDep = false
 
   for (const edge of edges) {
-    if (resolved.has(edge)) {
+    if (inPath.has(edge)) {
+      hasCircularDep = true
       continue
     }
 
-    if (ancestors.includes(edge)) {
-      isCircularDep = true
+    let edgeHasCircularDep = false
+
+    if (!visited.has(edge)) {
+      const edgeCode = fs.readFileSync(edge, 'utf8')
+
+      edgeHasCircularDep = getAllCodeDeps(
+        edge,
+        edgeCode,
+        include,
+        rootDir,
+        aliases,
+        debug,
+        visited,
+        inPath,
+        codeCache,
+        deepth + 1,
+      ).hasCircularDep
+    } else {
+      edgeHasCircularDep = !codeDepsCache.get(edge)
+    }
+
+    if (edgeHasCircularDep) {
+      hasCircularDep = true
       continue
     }
 
-    const edgeCode = fs.readFileSync(edge, 'utf8')
+    deps.add(edge)
 
-    const childDeps = getAllCodeDeps(
-      edge,
-      edgeCode,
-      include,
-      rootDir,
-      aliases,
-      debug,
-      ancestors,
-      resolved,
-      deep + 1,
-    )
-
-    if (childDeps.isCircularDep && deep !== 0) {
-      isCircularDep = true
-    }
-
-    for (const dep of childDeps.deps) {
-      resolved.set(dep.fileId, dep)
-    }
+    mergeEdgeDeps(edge, deps, codeCache)
   }
 
-  ancestors.splice(ancestors.indexOf(fileId), 1)
-  resolved.set(fileId, { fileId, code })
+  inPath.delete(fileId)
+
+  if (deepth === 0) {
+    visited.delete(fileId)
+  }
 
   const depsArray: CodeDependency[] = []
-  const depsId: Set<string> = new Set()
 
-  for (const dependency of resolved.values()) {
-    if (dependency.fileId === fileId) {
-      continue
+  if (hasCircularDep) {
+    if (deepth === 0) {
+      populateDepsArray(visited, codeCache, depsArray)
+
+      debug.addedToCache++
+      codeDepsCache.set(fileId, {
+        deps: depsArray,
+        depsId: visited,
+      })
     }
-
-    depsId.add(dependency.fileId)
-    depsArray.push(dependency)
+    //
+    else {
+      debug.notCached
+      codeDepsCache.set(fileId, false)
+    }
   }
+  //
+  else {
+    populateDepsArray(deps, codeCache, depsArray)
 
-  if (!isCircularDep) {
     debug.addedToCache++
-
     codeDepsCache.set(fileId, {
       deps: depsArray,
-      depsId: depsId,
+      depsId: deps,
     })
   }
 
-  debug.notCached++
+  return { deps: depsArray, hasCircularDep }
+}
 
-  return { deps: depsArray, isCircularDep }
+function populateDepsArray(
+  deps: Set<string>,
+  codeCache: Map<string, string>,
+  depsArray: CodeDependency[],
+) {
+  for (const depFileId of deps) {
+    const code = codeCache.get(depFileId)
+
+    if (!code) {
+      throw new Error(`File ${depFileId} not found`)
+    }
+
+    depsArray.push({
+      fileId: depFileId,
+      code: code,
+    })
+  }
 }
 
 function cleanCodeDepsCacheForFile(fileId: string) {

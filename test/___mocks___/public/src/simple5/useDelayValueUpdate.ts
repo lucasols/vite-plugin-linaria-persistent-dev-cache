@@ -1,4 +1,4 @@
-import { useTimeout } from '@src/circular5/useTimeout'
+import { useTimeout } from '@src/simple5/useTimeout'
 
 export const useDelayValueUpdate = 'useDelayValueUpdate'
 

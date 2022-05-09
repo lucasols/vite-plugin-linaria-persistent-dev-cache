@@ -38,11 +38,10 @@ describe('public tests', () => {
     `)
   })
 
-  describe('caching after simple case', () => {
-    test('simple case caching', () => {
-      getPublicFileDepHash('./src/base/base.tsx')
+  test('simple case caching', () => {
+    getPublicFileDepHash('./src/base/base.tsx')
 
-      expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+    expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
         [
           {
             "fileId": "base/base.tsx",
@@ -63,10 +62,9 @@ describe('public tests', () => {
           },
         ]
       `)
-    })
   })
 
-  describe('circular dependency is the main file', () => {
+  describe('circular 1: dependency is the main file', () => {
     test('deps are right', () => {
       const result = getPublicFileDepHash('./src/circular/circular.tsx')
 
@@ -109,12 +107,20 @@ describe('public tests', () => {
               "circular/dep2.ts",
             ],
           },
+          {
+            "fileId": "circular/dep1.ts",
+            "imports": false,
+          },
+          {
+            "fileId": "circular/dep2.ts",
+            "imports": false,
+          },
         ]
       `)
     })
   })
 
-  describe('circular dependency that is not the main file', () => {
+  describe('circular 2: dependency that is not the main file', () => {
     test('deps are right', () => {
       const result = getPublicFileDepHash('./src/circular2/dep1.ts')
 
@@ -141,12 +147,20 @@ describe('public tests', () => {
               "circular2/dep3.tsx",
             ],
           },
+          {
+            "fileId": "circular2/dep2.ts",
+            "imports": false,
+          },
+          {
+            "fileId": "circular2/dep3.tsx",
+            "imports": false,
+          },
         ]
       `)
     })
   })
 
-  describe('multiple circular dependencies in one file', () => {
+  describe('circular 3: multiple circular dependencies in one file', () => {
     test('cache format after circular dephash calc', () => {
       const result = getPublicFileDepHash('./src/circular3/dep1.ts')
 
@@ -162,15 +176,32 @@ describe('public tests', () => {
               "circular3/dep5.ts",
             ],
           },
+          {
+            "fileId": "circular3/dep2.ts",
+            "imports": false,
+          },
+          {
+            "fileId": "circular3/dep3.tsx",
+            "imports": false,
+          },
+          {
+            "fileId": "circular3/dep4.ts",
+            "imports": false,
+          },
+          {
+            "fileId": "circular3/dep5.ts",
+            "imports": false,
+          },
         ]
       `)
     })
+  })
 
-    test.only('cache format after circular dephash calc 2', () => {
-      const result = getPublicFileDepHash('./src/circular4/dep1.ts')
+  test('circular 4: multiple circular dependencies in one file', () => {
+    const result = getPublicFileDepHash('./src/circular4/dep1.ts')
 
-      expect(result.importsMap.length).toEqual(4)
-      expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+    expect(result.importsMap.length).toEqual(4)
+    expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
         [
           {
             "fileId": "circular4/dep1.ts",
@@ -181,69 +212,225 @@ describe('public tests', () => {
               "circular4/dep5.ts",
             ],
           },
+          {
+            "fileId": "circular4/dep2.ts",
+            "imports": false,
+          },
+          {
+            "fileId": "circular4/dep3.tsx",
+            "imports": false,
+          },
+          {
+            "fileId": "circular4/dep4.ts",
+            "imports": false,
+          },
+          {
+            "fileId": "circular4/dep5.ts",
+            "imports": false,
+          },
         ]
       `)
-    })
   })
 
-  test('do not consider reimporting a file in child a circular dep', () => {
-    const result = getPublicFileDepHash('./src/circular5/Dropdown.ts')
+  test('simple 5: do not consider reimporting a file in child a circular dep', () => {
+    const result = getPublicFileDepHash('./src/simple5/Dropdown.ts')
 
     expect(getSimplifiedSortedImports(result.importsMap))
       .toMatchInlineSnapshot(`
       [
-        "circular5/Popover.ts",
-        "circular5/PortalLayer.ts",
-        "circular5/typings.ts",
-        "circular5/useDelayValueUpdate.ts",
-        "circular5/useOnClickOutiside.ts",
-        "circular5/useTimeout.ts",
+        "simple5/Popover.ts",
+        "simple5/PortalLayer.ts",
+        "simple5/typings.ts",
+        "simple5/useDelayValueUpdate.ts",
+        "simple5/useOnClickOutiside.ts",
+        "simple5/useTimeout.ts",
       ]
     `)
 
     expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
       [
         {
-          "fileId": "circular5/Dropdown.ts",
+          "fileId": "simple5/Dropdown.ts",
           "imports": [
-            "circular5/Popover.ts",
-            "circular5/PortalLayer.ts",
-            "circular5/typings.ts",
-            "circular5/useDelayValueUpdate.ts",
-            "circular5/useOnClickOutiside.ts",
-            "circular5/useTimeout.ts",
+            "simple5/Popover.ts",
+            "simple5/PortalLayer.ts",
+            "simple5/typings.ts",
+            "simple5/useDelayValueUpdate.ts",
+            "simple5/useOnClickOutiside.ts",
+            "simple5/useTimeout.ts",
           ],
         },
         {
-          "fileId": "circular5/Popover.ts",
+          "fileId": "simple5/Popover.ts",
           "imports": [
-            "circular5/PortalLayer.ts",
+            "simple5/PortalLayer.ts",
           ],
         },
         {
-          "fileId": "circular5/PortalLayer.ts",
+          "fileId": "simple5/PortalLayer.ts",
           "imports": [],
         },
         {
-          "fileId": "circular5/typings.ts",
+          "fileId": "simple5/typings.ts",
           "imports": [],
         },
         {
-          "fileId": "circular5/useDelayValueUpdate.ts",
+          "fileId": "simple5/useDelayValueUpdate.ts",
           "imports": [
-            "circular5/useTimeout.ts",
+            "simple5/typings.ts",
+            "simple5/useTimeout.ts",
           ],
         },
         {
-          "fileId": "circular5/useOnClickOutiside.ts",
+          "fileId": "simple5/useOnClickOutiside.ts",
           "imports": [],
         },
         {
-          "fileId": "circular5/useTimeout.ts",
+          "fileId": "simple5/useTimeout.ts",
           "imports": [
-            "circular5/typings.ts",
+            "simple5/typings.ts",
           ],
-        }
+        },
+      ]
+    `)
+  })
+
+  test('simple 6', () => {
+    const result = getPublicFileDepHash('./src/simple6/dep1.ts')
+
+    expect(
+      getSimplifiedSortedImports(result.importsMap),
+    ).toMatchInlineSnapshot(`
+      [
+        "simple6/dep2.ts",
+        "simple6/dep3.ts",
+        "simple6/dep4.ts",
+      ]
+    `)
+
+    expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+      [
+        {
+          "fileId": "simple6/dep1.ts",
+          "imports": [
+            "simple6/dep2.ts",
+            "simple6/dep3.ts",
+            "simple6/dep4.ts",
+          ],
+        },
+        {
+          "fileId": "simple6/dep2.ts",
+          "imports": [
+            "simple6/dep3.ts",
+          ],
+        },
+        {
+          "fileId": "simple6/dep3.ts",
+          "imports": [],
+        },
+        {
+          "fileId": "simple6/dep4.ts",
+          "imports": [
+            "simple6/dep2.ts",
+            "simple6/dep3.ts",
+          ],
+        },
+      ]
+    `)
+  })
+
+  test('simple 7', () => {
+    const result = getPublicFileDepHash('./src/simple7/dep1.ts')
+
+    expect(
+      getSimplifiedSortedImports(result.importsMap),
+    ).toMatchInlineSnapshot(`
+      [
+        "simple7/dep2.ts",
+        "simple7/dep3.ts",
+        "simple7/dep4.ts",
+        "simple7/dep5.ts",
+      ]
+    `)
+
+    expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+      [
+        {
+          "fileId": "simple7/dep1.ts",
+          "imports": [
+            "simple7/dep2.ts",
+            "simple7/dep3.ts",
+            "simple7/dep4.ts",
+            "simple7/dep5.ts",
+          ],
+        },
+        {
+          "fileId": "simple7/dep2.ts",
+          "imports": [
+            "simple7/dep3.ts",
+          ],
+        },
+        {
+          "fileId": "simple7/dep3.ts",
+          "imports": [],
+        },
+        {
+          "fileId": "simple7/dep4.ts",
+          "imports": [
+            "simple7/dep5.ts",
+          ],
+        },
+        {
+          "fileId": "simple7/dep5.ts",
+          "imports": [],
+        },
+      ]
+    `)
+  })
+
+  test('circular 8', () => {
+    const result = getPublicFileDepHash('./src/circular8/circular.ts')
+
+    expect(
+      getSimplifiedSortedImports(result.importsMap),
+    ).toMatchInlineSnapshot(`
+      [
+        "circular8/dep1.ts",
+        "circular8/dep2.ts",
+        "circular8/dep3.ts",
+        "circular8/dep4.ts",
+      ]
+    `)
+
+    expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
+      [
+        {
+          "fileId": "circular8/circular.ts",
+          "imports": [
+            "circular8/dep1.ts",
+            "circular8/dep2.ts",
+            "circular8/dep3.ts",
+            "circular8/dep4.ts",
+          ],
+        },
+        {
+          "fileId": "circular8/dep1.ts",
+          "imports": false,
+        },
+        {
+          "fileId": "circular8/dep2.ts",
+          "imports": false,
+        },
+        {
+          "fileId": "circular8/dep3.ts",
+          "imports": [
+            "circular8/dep4.ts",
+          ],
+        },
+        {
+          "fileId": "circular8/dep4.ts",
+          "imports": [],
+        },
       ]
     `)
   })

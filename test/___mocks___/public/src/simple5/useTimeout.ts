@@ -1,4 +1,4 @@
-import { typings } from '@src/circular5/typings'
+import { typings } from '@src/simple5/typings'
 
 export const useTimeout = 'useTimeout'
 
