@@ -1,6 +1,24 @@
 import { describe, expect, test } from 'vitest'
 import { testOnly } from '../src/file-dep-hash'
-import { getPrivateFileDepHash } from './utils/setup'
+import {
+  getSortedCodeDepsCache,
+  getSortedImports,
+} from './utils/getSortedImports'
+import { getFileDepHash } from './utils/setup'
+
+const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
+
+function getSimplifiedSortedCodeDepsCache() {
+  return getSortedCodeDepsCache(root + 'src/')
+}
+
+function getSimplifiedSortedImports(imports: { fileId: string }[]) {
+  return getSortedImports(imports, root)
+}
+
+function getPrivateFileDepHash(file: string) {
+  return getFileDepHash(file, root)
+}
 
 describe('caches the deps of previous calls', () => {
   describe('Table then', () => {
@@ -9,10 +27,11 @@ describe('caches the deps of previous calls', () => {
         './src/components/Table/Table.tsx',
       )
 
-      console.log(tableResult.debug.timing)
+      // +- 400
+      console.log('first call', tableResult.debug.timing)
 
       expect(tableResult.importsMap.length).toEqual(726)
-      expect(tableResult.debug.addedToCache).toEqual(137)
+      expect(tableResult.debug.addedToCache).toEqual(317)
     })
 
     test('Table second call', () => {
@@ -25,7 +44,7 @@ describe('caches the deps of previous calls', () => {
 
       expect(tableResult2.importsMap.length, 'num of deps').toEqual(726)
 
-      console.log(tableResult2.debug.timing)
+      console.log('second call', tableResult2.debug.timing)
 
       expect(tableResult2.debug.timing).toBeLessThan(20)
     })
@@ -37,10 +56,10 @@ describe('caches the deps of previous calls', () => {
 
       expect(result.importsMap.length).toEqual(6)
 
-      expect(result.debug.getAllCodeDepsCalls).toEqual(7)
-      expect(result.debug.cached).toEqual(3)
-      expect(result.debug.notCached).toEqual(4)
-      expect(result.debug.addedToCache).toEqual(2)
+      expect(result.debug.getAllCodeDepsCalls).toEqual(1)
+      expect(result.debug.cached).toEqual(1)
+      expect(result.debug.notCached).toEqual(0)
+      expect(result.debug.addedToCache).toEqual(0)
     })
 
     test('MoreMenu', () => {
@@ -53,22 +72,41 @@ describe('caches the deps of previous calls', () => {
     })
   })
 
-  test('MoreMenu then DropDown', () => {
-    testOnly.resetCodeDepsCache()
+  test('uncached files', () => {
+    const uncached = getSimplifiedSortedCodeDepsCache()
+      .filter((entry) => !entry.imports)
+      .map((entry) => entry.fileId.replace(root, ''))
 
-    const moreMenuResult = getPrivateFileDepHash(
-      './src/components/MoreMenu.tsx',
-    )
-
-    expect(moreMenuResult.importsMap.length).toEqual(29)
-    expect(moreMenuResult.debug.cached).toEqual(0)
-
-    const dropdownResult = getPrivateFileDepHash(
-      './src/components/Dropdown/Dropdown.tsx',
-    )
-
-    expect(dropdownResult.importsMap.length).toEqual(6)
-    expect(dropdownResult.debug.cached).toEqual(1)
-    expect(dropdownResult.debug.notCached).toEqual(0)
+    expect(uncached).toMatchSnapshot()
+    expect(uncached.length).toMatchInlineSnapshot('410')
   })
+
+  test('add file with circular dependency to cache', () => {
+    const result = getPrivateFileDepHash('./src/components/Select/Select.tsx')
+
+    expect(getSimplifiedSortedImports(result.importsMap)).toMatchSnapshot()
+
+    const uncached = getSimplifiedSortedCodeDepsCache().filter(
+      (entry) => !entry.imports,
+    ).length
+
+    expect(uncached).toEqual(409)
+  })
+})
+
+test('MoreMenu then DropDown', () => {
+  testOnly.resetCodeDepsCache()
+
+  const moreMenuResult = getPrivateFileDepHash('./src/components/MoreMenu.tsx')
+
+  expect(moreMenuResult.importsMap.length).toEqual(29)
+  expect(moreMenuResult.debug.cached).toEqual(0)
+
+  const dropdownResult = getPrivateFileDepHash(
+    './src/components/Dropdown/Dropdown.tsx',
+  )
+
+  expect(dropdownResult.importsMap.length).toEqual(6)
+  expect(dropdownResult.debug.cached).toEqual(1)
+  expect(dropdownResult.debug.notCached).toEqual(0)
 })

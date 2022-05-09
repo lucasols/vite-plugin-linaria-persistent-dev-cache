@@ -11,7 +11,11 @@ type Aliases = {
   replacement: string
 }[]
 
-function getImportsFromCode(code: string, include: RegExp[]) {
+function getImportsFromCode(
+  code: string,
+  include: RegExp[],
+  exclude: RegExp[],
+): string[] {
   const codeWithoutComments = code.replace(/\/\/.*|\/\*[^]*?\*\//g, '')
 
   const regex = /from\s+['"]([^'"]+)['"]/g
@@ -21,9 +25,15 @@ function getImportsFromCode(code: string, include: RegExp[]) {
   const imports: string[] = []
 
   for (const [_, path] of allPossibleImports) {
-    if (include.some((pattern) => pattern.test(path!))) {
-      imports.push(path!)
+    if (!include.some((pattern) => pattern.test(path!))) {
+      continue
     }
+
+    if (exclude.some((regex) => regex.test(path!))) {
+      continue
+    }
+
+    imports.push(path!)
   }
 
   return imports
@@ -50,9 +60,13 @@ function getResolvedPath(
 
   normalizedPath = path.posix.join(rootDir, normalizedPath)
 
-  // FIX: change order based on file name casing, ex: ReactComp -> .tsx
+  const fileName = path.basename(normalizedPath)
 
-  const testSuffix = ['.tsx', '.ts', '/index.tsx', '/index.ts']
+  const firstLetterIsUpper = fileName[0]?.toUpperCase() === fileName[0]
+
+  const testSuffix = firstLetterIsUpper
+    ? ['.tsx', '.ts', '/index.tsx', '/index.ts']
+    : ['.ts', '.tsx', '/index.ts', '/index.tsx']
 
   for (const suffix of testSuffix) {
     const testURL = `${normalizedPath}${suffix}`
@@ -91,10 +105,11 @@ type Debug = {
 function getEdges(
   code: string,
   include: RegExp[],
+  exclude: RegExp[],
   aliases: Aliases,
   rootDir: string,
 ): string[] {
-  const imports = getImportsFromCode(code, include)
+  const imports = getImportsFromCode(code, include, exclude)
 
   const edges: string[] = []
 
@@ -134,6 +149,7 @@ function getAllCodeDeps(
   fileId: string,
   code: string,
   include: RegExp[],
+  exclude: RegExp[],
   rootDir: string,
   aliases: Aliases,
   debug: Debug,
@@ -155,7 +171,7 @@ function getAllCodeDeps(
   codeCache.set(fileId, code)
   inPath.add(fileId)
 
-  const edges = getEdges(code, include, aliases, rootDir)
+  const edges = getEdges(code, include, exclude, aliases, rootDir)
 
   const deps = new Set<string>()
 
@@ -176,6 +192,7 @@ function getAllCodeDeps(
         edge,
         edgeCode,
         include,
+        exclude,
         rootDir,
         aliases,
         debug,
@@ -255,19 +272,14 @@ function populateDepsArray(
   }
 }
 
-function cleanCodeDepsCacheForFile(fileId: string) {
-  if (!codeDepsCacheFilesIds.has(fileId)) {
-    // TODO: ignore files in the first build
-    return
-  }
-
+export function cleanCodeDepsCacheForFile(fileId: string) {
   for (const [id, cacheEntry] of codeDepsCache.entries()) {
     if (fileId === id) {
       codeDepsCache.delete(id)
       continue
     }
 
-    if (cacheEntry.depsId.has(fileId)) {
+    if (cacheEntry && cacheEntry.depsId.has(fileId)) {
       codeDepsCache.delete(id)
     }
   }
@@ -277,6 +289,7 @@ export function getCodeHash(
   fileId: string,
   code: string,
   include: RegExp[],
+  exclude: RegExp[],
   aliases: Aliases,
   rootDir: string,
 ): {
@@ -299,6 +312,7 @@ export function getCodeHash(
     fileId,
     code,
     include,
+    exclude,
     rootDir,
     aliases,
     debug,

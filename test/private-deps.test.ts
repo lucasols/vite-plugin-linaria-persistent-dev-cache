@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import { testOnly } from '../src/file-dep-hash'
 import { getSortedImports } from './utils/getSortedImports'
-import { getPrivateFileDepHash } from './utils/setup'
+import { getFileDepHash } from './utils/setup'
+
+const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
+
+function getPrivateFileDepHash(file: string, exclude?: RegExp[]) {
+  return getFileDepHash(file, root, exclude)
+}
 
 beforeEach(() => {
   testOnly.resetCodeDepsCache()
@@ -39,5 +45,15 @@ describe('get the correct deps for a file', () => {
     expect(result.importsMap.length).toEqual(29)
 
     expect(getSortedImports(result.importsMap)).toMatchSnapshot()
+  })
+})
+
+describe('exclude patterns', () => {
+  test('Table deps', () => {
+    const tableResult = getPrivateFileDepHash(
+      './src/components/Table/Table.tsx',
+      [/^@src\/state\//, /^@src\/api\//, /^@src\/utils\//],
+    )
+    expect(tableResult.importsMap.length).toEqual(332)
   })
 })
