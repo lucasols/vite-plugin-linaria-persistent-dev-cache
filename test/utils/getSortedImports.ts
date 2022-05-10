@@ -1,4 +1,4 @@
-import { getResolvedCache } from '../../src/deepFirstSearch'
+import { getResolvedCache } from '../dfs/deepFirstSearch'
 import { testOnly } from '../../src/file-dep-hash'
 import { sortBy } from './sortBy'
 

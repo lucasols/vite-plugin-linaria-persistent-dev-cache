@@ -1,17 +1,27 @@
 {
-  "name": "vitest-test",
-  "private": true,
-  "main": "index.js",
+  "name": "vite-plugin-linaria-persistent-dev-cache",
+  "version": "1.0.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "build": "vitest run && vite build"
+  },
+  "module": "./dist/vite-plugin-linaria.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vite-plugin-linaria.es.js"
+    }
   },
   "devDependencies": {
+    "@linaria/babel-preset": "^3.0.0-beta.18",
+    "@rollup/plugin-typescript": "^8.3.2",
     "@types/node": "^17.0.9",
     "@vitest/ui": "0.10.2",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
     "vite": "2.9.7",
     "vitest": "0.10.2"
   }

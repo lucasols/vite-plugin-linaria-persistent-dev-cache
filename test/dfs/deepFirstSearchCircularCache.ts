@@ -1,4 +1,4 @@
-import { mapEmplace } from './utils'
+import { mapEmplace } from '../../src/utils'
 
 export type Graph = Record<string, string[]>
 

@@ -88,7 +88,6 @@ const codeDepsCache = new Map<
   string,
   { deps: CodeDependency[]; depsId: Set<string> } | false
 >()
-const codeDepsCacheFilesIds = new Set<string>()
 
 function getCodeDepsCache() {
   return codeDepsCache
@@ -126,11 +125,7 @@ function getEdges(
   return edges
 }
 
-function mergeEdgeDeps(
-  edge: string,
-  deps: Set<string>,
-  codeCache: Map<string, string>,
-) {
+function mergeEdgeDeps(edge: string, deps: Map<string, string>) {
   const cacheEntry = codeDepsCache.get(edge)
 
   if (!cacheEntry) {
@@ -140,8 +135,7 @@ function mergeEdgeDeps(
   const edgeDeps = cacheEntry.deps
 
   for (const dep of edgeDeps) {
-    deps.add(dep.fileId)
-    codeCache.set(dep.fileId, dep.code)
+    deps.set(dep.fileId, dep.code)
   }
 }
 
@@ -153,9 +147,8 @@ function getAllCodeDeps(
   rootDir: string,
   aliases: Aliases,
   debug: Debug,
-  visited: Set<string> = new Set(),
+  visited: Map<string, string> = new Map(),
   inPath: Set<string> = new Set(),
-  codeCache: Map<string, string> = new Map(),
   deepth = 0,
 ): { deps: CodeDependency[]; hasCircularDep: boolean } {
   debug.getAllCodeDepsCalls++
@@ -164,16 +157,16 @@ function getAllCodeDeps(
 
   if (cachedValue) {
     debug.cached++
+
     return { deps: cachedValue.deps, hasCircularDep: false }
   }
 
-  visited.add(fileId)
-  codeCache.set(fileId, code)
+  visited.set(fileId, code)
   inPath.add(fileId)
 
   const edges = getEdges(code, include, exclude, aliases, rootDir)
 
-  const deps = new Set<string>()
+  const deps = new Map<string, string>()
 
   let hasCircularDep = false
 
@@ -185,8 +178,10 @@ function getAllCodeDeps(
 
     let edgeHasCircularDep = false
 
+    let edgeCode: string
+
     if (!visited.has(edge)) {
-      const edgeCode = fs.readFileSync(edge, 'utf8')
+      edgeCode = fs.readFileSync(edge, 'utf8')
 
       edgeHasCircularDep = getAllCodeDeps(
         edge,
@@ -198,11 +193,12 @@ function getAllCodeDeps(
         debug,
         visited,
         inPath,
-        codeCache,
         deepth + 1,
       ).hasCircularDep
     } else {
       edgeHasCircularDep = !codeDepsCache.get(edge)
+
+      edgeCode = visited.get(edge)!
     }
 
     if (edgeHasCircularDep) {
@@ -210,9 +206,9 @@ function getAllCodeDeps(
       continue
     }
 
-    deps.add(edge)
+    deps.set(edge, edgeCode)
 
-    mergeEdgeDeps(edge, deps, codeCache)
+    mergeEdgeDeps(edge, deps)
   }
 
   inPath.delete(fileId)
@@ -222,15 +218,16 @@ function getAllCodeDeps(
   }
 
   const depsArray: CodeDependency[] = []
+  const depsId = new Set<string>()
 
   if (hasCircularDep) {
     if (deepth === 0) {
-      populateDepsArray(visited, codeCache, depsArray)
+      populateDepsArray(visited, depsArray, depsId)
 
       debug.addedToCache++
       codeDepsCache.set(fileId, {
         deps: depsArray,
-        depsId: visited,
+        depsId,
       })
     }
     //
@@ -241,12 +238,12 @@ function getAllCodeDeps(
   }
   //
   else {
-    populateDepsArray(deps, codeCache, depsArray)
+    populateDepsArray(deps, depsArray, depsId)
 
     debug.addedToCache++
     codeDepsCache.set(fileId, {
       deps: depsArray,
-      depsId: deps,
+      depsId,
     })
   }
 
@@ -254,25 +251,28 @@ function getAllCodeDeps(
 }
 
 function populateDepsArray(
-  deps: Set<string>,
-  codeCache: Map<string, string>,
+  deps: Map<string, string>,
   depsArray: CodeDependency[],
+  depsId: Set<string>,
 ) {
-  for (const depFileId of deps) {
-    const code = codeCache.get(depFileId)
-
-    if (!code) {
-      throw new Error(`File ${depFileId} not found`)
-    }
-
+  for (const [depFileId, code] of deps) {
     depsArray.push({
       fileId: depFileId,
       code: code,
     })
+
+    depsId.add(depFileId)
   }
 }
 
+const changedAfterInitialBuild = new Set<string>()
+
 export function cleanCodeDepsCacheForFile(fileId: string) {
+  if (!changedAfterInitialBuild.has(fileId)) {
+    changedAfterInitialBuild.add(fileId)
+    return
+  }
+
   for (const [id, cacheEntry] of codeDepsCache.entries()) {
     if (fileId === id) {
       codeDepsCache.delete(id)
@@ -337,7 +337,7 @@ export function getCodeHash(
 
 function resetCodeDepsCache() {
   codeDepsCache.clear()
-  codeDepsCacheFilesIds.clear()
+  changedAfterInitialBuild.clear()
 }
 
 export const testOnly = {

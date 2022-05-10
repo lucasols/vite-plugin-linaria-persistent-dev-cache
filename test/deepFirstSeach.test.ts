@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from 'vitest'
-import { cleanResolvedCache, deepFirstSearch } from '../src/deepFirstSearch'
+import { cleanResolvedCache, deepFirstSearch } from './dfs/deepFirstSearch'
 import { getDFSStableCache } from './utils/getSortedImports'
 
 beforeEach(() => {
