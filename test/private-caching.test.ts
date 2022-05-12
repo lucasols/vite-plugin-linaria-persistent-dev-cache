@@ -1,15 +1,16 @@
 import { describe, expect, test } from 'vitest'
-import { testOnly } from '../src/file-dep-hash'
 import {
   getSortedCodeDepsCache,
   getSortedImports,
 } from './utils/getSortedImports'
-import { getFileDepHash } from './utils/setup'
+import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 
 const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
 
+const fileDepHash = createFileDeepHashInstance(root)
+
 function getSimplifiedSortedCodeDepsCache() {
-  return getSortedCodeDepsCache(root + 'src/')
+  return getSortedCodeDepsCache(root + 'src/', fileDepHash)
 }
 
 function getSimplifiedSortedImports(imports: { fileId: string }[]) {
@@ -17,7 +18,7 @@ function getSimplifiedSortedImports(imports: { fileId: string }[]) {
 }
 
 function getPrivateFileDepHash(file: string) {
-  return getFileDepHash(file, root)
+  return getFileDepHash(file, root, fileDepHash)
 }
 
 describe('caches the deps of previous calls', () => {
@@ -95,7 +96,7 @@ describe('caches the deps of previous calls', () => {
 })
 
 test('MoreMenu then DropDown', () => {
-  testOnly.resetCodeDepsCache()
+  fileDepHash.resetCache()
 
   const moreMenuResult = getPrivateFileDepHash('./src/components/MoreMenu.tsx')
 

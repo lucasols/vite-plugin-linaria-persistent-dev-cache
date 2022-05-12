@@ -1,18 +1,26 @@
 import type { Result } from '@linaria/babel-preset'
 import fs from 'fs'
 
-type FileEntry = {
+interface FileEntry {
   code: string
   map: Result['sourceMap']
   cssText: string
   cssSlug: string
 }
 
+interface CacheEntry extends FileEntry {
+  fileId: string
+  timestamp: number
+}
+
+interface CacheFile {
+  results: CacheEntry[]
+}
+
 type Options = {
   cacheFilePath: string
   viteConfigFilePath: string
-  packageJsonPath: string
-  packageJsonDependencies: string[]
+  lockFilePath: string
 }
 
 export function createPersistentCache({ cacheFilePath }: Options) {

@@ -1,27 +1,28 @@
 import { beforeEach, describe, expect, test } from 'vitest'
-import { testOnly } from '../src/file-dep-hash'
 import {
   getSortedCodeDepsCache,
   getSortedImports,
 } from './utils/getSortedImports'
-import { getFileDepHash } from './utils/setup'
+import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 
 const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/'
 
-function getPublicFileDepHash(file: string) {
-  return getFileDepHash(file, root)
+const fileDepHash = createFileDeepHashInstance(root)
+
+function getSimplifiedSortedCodeDepsCache() {
+  return getSortedCodeDepsCache(root + 'src/', fileDepHash)
 }
 
 function getSimplifiedSortedImports(imports: { fileId: string }[]) {
   return getSortedImports(imports, root + 'src/')
 }
 
-function getSimplifiedSortedCodeDepsCache() {
-  return getSortedCodeDepsCache(root + 'src/')
+function getPublicFileDepHash(file: string) {
+  return getFileDepHash(file, root, fileDepHash)
 }
 
 beforeEach(() => {
-  testOnly.resetCodeDepsCache()
+  fileDepHash.resetCache()
 })
 
 describe('public tests', () => {
@@ -298,9 +299,8 @@ describe('public tests', () => {
   test('simple 6', () => {
     const result = getPublicFileDepHash('./src/simple6/dep1.ts')
 
-    expect(
-      getSimplifiedSortedImports(result.importsMap),
-    ).toMatchInlineSnapshot(`
+    expect(getSimplifiedSortedImports(result.importsMap))
+      .toMatchInlineSnapshot(`
       [
         "simple6/dep2.ts",
         "simple6/dep3.ts",
@@ -342,9 +342,8 @@ describe('public tests', () => {
   test('simple 7', () => {
     const result = getPublicFileDepHash('./src/simple7/dep1.ts')
 
-    expect(
-      getSimplifiedSortedImports(result.importsMap),
-    ).toMatchInlineSnapshot(`
+    expect(getSimplifiedSortedImports(result.importsMap))
+      .toMatchInlineSnapshot(`
       [
         "simple7/dep2.ts",
         "simple7/dep3.ts",
@@ -391,9 +390,8 @@ describe('public tests', () => {
   test('circular 8', () => {
     const result = getPublicFileDepHash('./src/circular8/circular.ts')
 
-    expect(
-      getSimplifiedSortedImports(result.importsMap),
-    ).toMatchInlineSnapshot(`
+    expect(getSimplifiedSortedImports(result.importsMap))
+      .toMatchInlineSnapshot(`
       [
         "circular8/dep1.ts",
         "circular8/dep2.ts",

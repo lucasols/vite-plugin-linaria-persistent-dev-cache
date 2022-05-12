@@ -11,7 +11,12 @@ export function getImports(file: string) {
   const code = fs.readFileSync(fileId, 'utf-8')
   const include = [/^@src\//, /^@utils\//]
 
-  const result = testOnly.getImportsFromCode(code, include, [])
+  const result = testOnly.getImportsFromCode(code, {
+    include,
+    exclude: [],
+    aliases: [],
+    rootDir: '.',
+  })
 
   return result
 }

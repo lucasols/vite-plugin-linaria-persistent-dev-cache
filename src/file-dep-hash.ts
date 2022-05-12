@@ -11,10 +11,24 @@ type Aliases = {
   replacement: string
 }[]
 
+interface FileDepHashConfig {
+  include: RegExp[]
+  exclude: RegExp[]
+  aliases: Aliases
+  rootDir: string
+  disableDepCache?: boolean
+  resolveRelative?: boolean
+}
+
+interface InstanceProps extends FileDepHashConfig {
+  resolveCache: Map<string, string>
+  codeDepsCache: Map<string, CacheEntry>
+  changedAfterInitialBuild: Set<string>
+}
+
 function getImportsFromCode(
   code: string,
-  include: RegExp[],
-  exclude: RegExp[],
+  { include, exclude }: InstanceProps,
 ): string[] {
   const codeWithoutComments = code.replace(/\/\/.*|\/\*[^]*?\*\//g, '')
 
@@ -39,12 +53,9 @@ function getImportsFromCode(
   return imports
 }
 
-const resolveCache = new Map<string, string>()
-
 function getResolvedPath(
   filePath: string,
-  aliases: Aliases,
-  rootDir: string,
+  { aliases, rootDir, resolveCache }: InstanceProps,
 ): string | false {
   if (resolveCache.has(filePath)) {
     return resolveCache.get(filePath)!
@@ -85,22 +96,21 @@ function getResolvedPath(
 
 function getCodeFromResolvedPath(
   resolvedPath: string,
-  aliases: Aliases,
-  rootDir: string,
+  config: InstanceProps,
 ): string {
   let code: string
 
   try {
     code = fs.readFileSync(resolvedPath, 'utf8')
   } catch (e) {
-    for (const [unresolved, resolved] of resolveCache) {
+    for (const [unresolved, resolved] of config.resolveCache) {
       if (resolved === resolvedPath) {
-        resolveCache.delete(unresolved)
+        config.resolveCache.delete(unresolved)
 
-        const resolvedPath = getResolvedPath(unresolved, aliases, rootDir)
+        const resolvedPath = getResolvedPath(unresolved, config)
 
         if (resolvedPath) {
-          return getCodeFromResolvedPath(resolvedPath, aliases, rootDir)
+          return getCodeFromResolvedPath(resolvedPath, config)
         }
       }
     }
@@ -116,14 +126,12 @@ type CodeDependency = {
   code: string
 }
 
-const codeDepsCache = new Map<
-  string,
-  { deps: CodeDependency[]; depsId: Set<string> } | false
->()
-
-function getCodeDepsCache() {
-  return codeDepsCache
-}
+type CacheEntry =
+  | {
+      deps: CodeDependency[]
+      depsId: Set<string>
+    }
+  | false
 
 type Debug = {
   cached: number
@@ -133,19 +141,13 @@ type Debug = {
   getAllCodeDepsCalls: number
 }
 
-function getEdges(
-  code: string,
-  include: RegExp[],
-  exclude: RegExp[],
-  aliases: Aliases,
-  rootDir: string,
-): string[] {
-  const imports = getImportsFromCode(code, include, exclude)
+function getEdges(code: string, config: InstanceProps): string[] {
+  const imports = getImportsFromCode(code, config)
 
   const edges: string[] = []
 
   for (const importPath of imports) {
-    const resolvedFiledId = getResolvedPath(importPath, aliases, rootDir)
+    const resolvedFiledId = getResolvedPath(importPath, config)
 
     if (!resolvedFiledId) {
       continue
@@ -157,8 +159,12 @@ function getEdges(
   return edges
 }
 
-function mergeEdgeDeps(edge: string, deps: Map<string, string>) {
-  const cacheEntry = codeDepsCache.get(edge)
+function mergeEdgeDeps(
+  edge: string,
+  deps: Map<string, string>,
+  config: InstanceProps,
+) {
+  const cacheEntry = config.codeDepsCache.get(edge)
 
   if (!cacheEntry) {
     return
@@ -174,10 +180,7 @@ function mergeEdgeDeps(edge: string, deps: Map<string, string>) {
 function getAllCodeDeps(
   fileId: string,
   code: string,
-  include: RegExp[],
-  exclude: RegExp[],
-  rootDir: string,
-  aliases: Aliases,
+  config: InstanceProps,
   debug: Debug,
   visited: Map<string, string> = new Map(),
   inPath: Set<string> = new Set(),
@@ -185,7 +188,7 @@ function getAllCodeDeps(
 ): { deps: CodeDependency[]; hasCircularDep: boolean } {
   debug.getAllCodeDepsCalls++
 
-  const cachedValue = codeDepsCache.get(fileId)
+  const cachedValue = config.codeDepsCache.get(fileId)
 
   if (cachedValue) {
     debug.cached++
@@ -196,7 +199,7 @@ function getAllCodeDeps(
   visited.set(fileId, code)
   inPath.add(fileId)
 
-  const edges = getEdges(code, include, exclude, aliases, rootDir)
+  const edges = getEdges(code, config)
 
   const deps = new Map<string, string>()
 
@@ -213,22 +216,19 @@ function getAllCodeDeps(
     let edgeCode: string
 
     if (!visited.has(edge)) {
-      edgeCode = getCodeFromResolvedPath(edge, aliases, rootDir)
+      edgeCode = getCodeFromResolvedPath(edge, config)
 
       edgeHasCircularDep = getAllCodeDeps(
         edge,
         edgeCode,
-        include,
-        exclude,
-        rootDir,
-        aliases,
+        config,
         debug,
         visited,
         inPath,
         deepth + 1,
       ).hasCircularDep
     } else {
-      edgeHasCircularDep = !codeDepsCache.get(edge)
+      edgeHasCircularDep = !config.codeDepsCache.get(edge)
 
       edgeCode = visited.get(edge)!
     }
@@ -240,7 +240,7 @@ function getAllCodeDeps(
 
     deps.set(edge, edgeCode)
 
-    mergeEdgeDeps(edge, deps)
+    mergeEdgeDeps(edge, deps, config)
   }
 
   inPath.delete(fileId)
@@ -257,7 +257,7 @@ function getAllCodeDeps(
       populateDepsArray(visited, depsArray, depsId)
 
       debug.addedToCache++
-      codeDepsCache.set(fileId, {
+      config.codeDepsCache.set(fileId, {
         deps: depsArray,
         depsId,
       })
@@ -265,7 +265,7 @@ function getAllCodeDeps(
     //
     else {
       debug.notCached
-      codeDepsCache.set(fileId, false)
+      config.codeDepsCache.set(fileId, false)
     }
   }
   //
@@ -273,7 +273,7 @@ function getAllCodeDeps(
     populateDepsArray(deps, depsArray, depsId)
 
     debug.addedToCache++
-    codeDepsCache.set(fileId, {
+    config.codeDepsCache.set(fileId, {
       deps: depsArray,
       depsId,
     })
@@ -297,9 +297,10 @@ function populateDepsArray(
   }
 }
 
-const changedAfterInitialBuild = new Set<string>()
-
-export function cleanCodeDepsCacheForFile(fileId: string) {
+function cleanCodeDepsCacheForFile(
+  fileId: string,
+  { changedAfterInitialBuild, codeDepsCache }: InstanceProps,
+) {
   if (!changedAfterInitialBuild.has(fileId)) {
     changedAfterInitialBuild.add(fileId)
     return
@@ -317,18 +318,17 @@ export function cleanCodeDepsCacheForFile(fileId: string) {
   }
 }
 
-export function getCodeHash(
-  fileId: string,
-  code: string,
-  include: RegExp[],
-  exclude: RegExp[],
-  aliases: Aliases,
-  rootDir: string,
-): {
+type CodeHashResult = {
   hash: string
   importsMap: CodeDependency[]
   debug: Debug
-} {
+}
+
+function getCodeHash(
+  fileId: string,
+  code: string,
+  config: InstanceProps,
+): CodeHashResult {
   const debug: Debug = {
     cached: 0,
     notCached: 0,
@@ -339,15 +339,7 @@ export function getCodeHash(
 
   const start = Date.now()
 
-  const importsMap = getAllCodeDeps(
-    fileId,
-    code,
-    include,
-    exclude,
-    rootDir,
-    aliases,
-    debug,
-  )
+  const importsMap = getAllCodeDeps(fileId, code, config, debug)
 
   const codeHash = generateStringHash(code)
 
@@ -366,13 +358,52 @@ export function getCodeHash(
   }
 }
 
-function resetCodeDepsCache() {
-  codeDepsCache.clear()
-  changedAfterInitialBuild.clear()
+export type FileDepHashInstance = {
+  resetCache: () => void
+  getHash: (fileId: string, code: string) => CodeHashResult
+  getCodeDepsCache: () => Map<string, CacheEntry>
+  cleanCacheForFile: (fileId: string) => void
+}
+
+export function createFileDepHash(
+  config: FileDepHashConfig,
+): FileDepHashInstance {
+  const resolveCache = new Map<string, string>()
+  const codeDepsCache = new Map<string, CacheEntry>()
+  const changedAfterInitialBuild = new Set<string>()
+
+  const instance: InstanceProps = {
+    ...config,
+    resolveCache,
+    codeDepsCache,
+    changedAfterInitialBuild,
+  }
+
+  function resetCache() {
+    codeDepsCache.clear()
+    changedAfterInitialBuild.clear()
+  }
+
+  function getCodeDepsCache() {
+    return codeDepsCache
+  }
+
+  function cleanCacheForFile(fileId: string) {
+    cleanCodeDepsCacheForFile(fileId, instance)
+  }
+
+  function getHash(fileId: string, code: string): CodeHashResult {
+    return getCodeHash(fileId, code, instance)
+  }
+
+  return {
+    resetCache,
+    getHash,
+    getCodeDepsCache,
+    cleanCacheForFile,
+  }
 }
 
 export const testOnly = {
   getImportsFromCode,
-  getCodeDepsCache,
-  resetCodeDepsCache,
 }

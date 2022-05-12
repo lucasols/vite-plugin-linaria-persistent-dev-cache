@@ -6,7 +6,7 @@
 import { EvalCache, Module, slugify, transform } from '@linaria/babel-preset'
 import path from 'path'
 import { Plugin, ResolvedConfig, normalizePath } from 'vite'
-import { createPersistentCache } from './createPersistentCache'
+import { createPersistentCache } from './persistentCache'
 import { cleanCodeDepsCacheForFile, getCodeHash } from './file-dep-hash'
 
 type RollupPluginOptions = {
@@ -15,9 +15,8 @@ type RollupPluginOptions = {
   disableDevPersistentCache?: boolean
   include?: RegExp[]
   exclude?: RegExp[]
+  lockFilePath: string
   viteConfigFilePath?: string
-  packageJsonPath?: string
-  packageJsonDependencies?: string[]
 }
 
 export default function linaria({
@@ -27,10 +26,9 @@ export default function linaria({
   include = [],
   exclude = [],
   viteConfigFilePath = 'vite.config.js',
-  packageJsonPath = 'package.json',
-  packageJsonDependencies = [],
-}: RollupPluginOptions = {}): Plugin {
-  const root = process.cwd()
+  lockFilePath,
+}: RollupPluginOptions): Plugin {
+  const root = normalizePath(process.cwd())
   let config: ResolvedConfig
 
   const virtualCssFiles = new Map<string, string>()
@@ -38,8 +36,7 @@ export default function linaria({
   const persistentCache = createPersistentCache({
     cacheFilePath: persistentCachePath,
     viteConfigFilePath,
-    packageJsonPath,
-    packageJsonDependencies,
+    lockFilePath,
   })
 
   function getVirtualName(slug: string) {
@@ -76,14 +73,12 @@ export default function linaria({
       if (enablePersistentCache) {
         cleanCodeDepsCacheForFile(id)
 
-        hash = getCodeHash(
-          id,
-          code,
+        hash = getCodeHash(id, code, {
           include,
           exclude,
-          config.resolve.alias,
-          normalizePath(root),
-        ).hash
+          aliases: config.resolve.alias,
+          rootDir: root,
+        }).hash
 
         const cached = persistentCache.getFile(hash)
 

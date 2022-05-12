@@ -1,6 +1,6 @@
-import { writeFileSync } from 'fs'
+import fs from 'fs'
 import v8Profiler from 'v8-profiler-next'
-import { testOnly } from '../src/file-dep-hash'
+import { resetCodeDepsCache, testOnly } from '../src/file-dep-hash'
 import { getFileDepHash } from './utils/setup'
 
 const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
@@ -9,10 +9,10 @@ function getPrivateFileDepHash(file: string) {
   return getFileDepHash(file, root)
 }
 
-getPrivateFileDepHash('./src/components/Table/Table.tsx')
-testOnly.resetCodeDepsCache()
-getPrivateFileDepHash('./src/components/Table/Table.tsx')
-testOnly.resetCodeDepsCache()
+for (let i = 0; i < 10; i++) {
+  getPrivateFileDepHash('./src/components/Table/Table.tsx')
+  resetCodeDepsCache()
+}
 
 v8Profiler.setGenerateType(1)
 
@@ -29,5 +29,15 @@ const elapsed = Date.now() - start
 console.log('elapsed ', elapsed, 'ms')
 
 profile.export((err, result) => {
-  writeFileSync(`table.cpuprofile`, result!)
+  fs.writeFileSync(`table.cpuprofile`, result!)
 })
+
+let previousBenchResults: Record<string, number> = {}
+
+try {
+  previousBenchResults = JSON.parse(fs.readFileSync('benchs.json', 'utf8'))
+} catch (error) {}
+
+previousBenchResults[new Date().toISOString().substring(0, 19)] = elapsed
+
+fs.writeFileSync('benchs.json', JSON.stringify(previousBenchResults, null, 2))

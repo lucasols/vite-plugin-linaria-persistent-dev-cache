@@ -1,5 +1,5 @@
 import { getResolvedCache } from '../dfs/deepFirstSearch'
-import { testOnly } from '../../src/file-dep-hash'
+import { FileDepHashInstance, testOnly } from '../../src/file-dep-hash'
 import { sortBy } from './sortBy'
 
 export function getSortedImports(
@@ -13,8 +13,11 @@ export function getSortedImports(
     .sort()
 }
 
-export function getSortedCodeDepsCache(root: string) {
-  const codeDepsCache = testOnly.getCodeDepsCache()
+export function getSortedCodeDepsCache(
+  root: string,
+  deepHashInstance: FileDepHashInstance,
+) {
+  const codeDepsCache = deepHashInstance.getCodeDepsCache()
 
   const deps: { fileId: string; imports: string[] | false }[] = []
 

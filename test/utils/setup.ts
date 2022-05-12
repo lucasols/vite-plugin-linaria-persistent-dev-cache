@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { getCodeHash } from '../../src/file-dep-hash'
+import { createFileDepHash, FileDepHashInstance } from '../../src/file-dep-hash'
 
 const defaultInclude = [/^@src\//, /^@utils\//]
 const defaultAliases = [
@@ -8,23 +8,28 @@ const defaultAliases = [
   { find: '@utils', replacement: '/utils' },
 ]
 
+export function createFileDeepHashInstance(
+  rootDir: string,
+  exclude: RegExp[] = [],
+) {
+  return createFileDepHash({
+    rootDir: rootDir,
+    aliases: defaultAliases,
+    include: defaultInclude,
+    exclude,
+  })
+}
+
 export function getFileDepHash(
   file: string,
   root: string,
-  exclude: RegExp[] = [],
+  deepHashInstance: FileDepHashInstance,
 ) {
   const fileId = path.posix.join(root, file)
 
   const code = fs.readFileSync(fileId, 'utf-8')
 
-  const result = getCodeHash(
-    fileId,
-    code,
-    defaultInclude,
-    exclude,
-    defaultAliases,
-    root,
-  )
+  const result = deepHashInstance.getHash(fileId, code)
 
   return result
 }

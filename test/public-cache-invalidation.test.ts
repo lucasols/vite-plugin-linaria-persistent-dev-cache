@@ -1,13 +1,15 @@
 import path from 'path'
 import { beforeEach, describe, expect, test } from 'vitest'
-import { cleanCodeDepsCacheForFile, testOnly } from '../src/file-dep-hash'
+import { testOnly } from '../src/file-dep-hash'
 import { getSortedCodeDepsCache } from './utils/getSortedImports'
-import { getFileDepHash } from './utils/setup'
+import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 
 const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/'
 
+const fileDepHash = createFileDeepHashInstance(root)
+
 function getPublicFileDepHash(file: string) {
-  return getFileDepHash(file, root)
+  return getFileDepHash(file, root, fileDepHash)
 }
 
 export function getFileId(file: string) {
@@ -15,18 +17,18 @@ export function getFileId(file: string) {
 }
 
 function getSimplifiedSortedCodeDepsCache() {
-  return getSortedCodeDepsCache(root + 'src/')
+  return getSortedCodeDepsCache(root + 'src/', fileDepHash)
 }
 
 test('invalidates cache of file', () => {
-  testOnly.resetCodeDepsCache()
+  fileDepHash.resetCache()
 
   const result = getPublicFileDepHash('./src/simple5/Dropdown.ts')
 
   expect(result.importsMap.length).toEqual(6)
 
-  cleanCodeDepsCacheForFile(getFileId('./src/simple5/PortalLayer.ts'))
-  cleanCodeDepsCacheForFile(getFileId('./src/simple5/PortalLayer.ts'))
+  fileDepHash.cleanCacheForFile(getFileId('./src/simple5/PortalLayer.ts'))
+  fileDepHash.cleanCacheForFile(getFileId('./src/simple5/PortalLayer.ts'))
 
   expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
     [
@@ -56,14 +58,14 @@ test('invalidates cache of file', () => {
 })
 
 test('invalidates cache of a file with circular dependency', () => {
-  testOnly.resetCodeDepsCache()
+  fileDepHash.resetCache()
 
   const result = getPublicFileDepHash('./src/circular3/dep1.ts')
 
   expect(result.importsMap.length).toEqual(4)
 
-  cleanCodeDepsCacheForFile(getFileId('./src/circular3/dep5.ts'))
-  cleanCodeDepsCacheForFile(getFileId('./src/circular3/dep5.ts'))
+  fileDepHash.cleanCacheForFile(getFileId('./src/circular3/dep5.ts'))
+  fileDepHash.cleanCacheForFile(getFileId('./src/circular3/dep5.ts'))
 
   expect(getSimplifiedSortedCodeDepsCache()).toMatchInlineSnapshot(`
     [
@@ -85,7 +87,7 @@ test('invalidates cache of a file with circular dependency', () => {
 
 describe('emulate vite behaviour', () => {
   function emulateViteTransform(file: string) {
-    cleanCodeDepsCacheForFile(getFileId(file))
+    fileDepHash.cleanCacheForFile(getFileId(file))
     getPublicFileDepHash(file)
   }
 
@@ -128,7 +130,7 @@ describe('emulate vite behaviour', () => {
   ]
 
   test('vite first build', () => {
-    testOnly.resetCodeDepsCache()
+    fileDepHash.resetCache()
 
     emulateViteTransform('./src/simple5/Dropdown.ts')
 

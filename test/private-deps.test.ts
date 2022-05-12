@@ -1,23 +1,24 @@
 import { beforeEach, describe, expect, test } from 'vitest'
-import { testOnly } from '../src/file-dep-hash'
 import {
   getSortedCodeDepsCache,
   getSortedImports,
 } from './utils/getSortedImports'
-import { getFileDepHash } from './utils/setup'
+import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 
 const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
 
+const fileDepHash = createFileDeepHashInstance(root)
+
 function getSimplifiedSortedCodeDepsCache() {
-  return getSortedCodeDepsCache(root + 'src/')
+  return getSortedCodeDepsCache(root + 'src/', fileDepHash)
 }
 
-function getPrivateFileDepHash(file: string, exclude?: RegExp[]) {
-  return getFileDepHash(file, root, exclude)
+function getPrivateFileDepHash(file: string) {
+  return getFileDepHash(file, root, fileDepHash)
 }
 
 beforeEach(() => {
-  testOnly.resetCodeDepsCache()
+  fileDepHash.resetCache()
 })
 
 describe('get the correct deps for a file', () => {
@@ -56,19 +57,22 @@ describe('get the correct deps for a file', () => {
 })
 
 test('exclude patterns', () => {
-  const tableResult = getPrivateFileDepHash(
+  const fileDepHash2 = createFileDeepHashInstance(root, [
+    /^@src\/state\//,
+    /^@src\/api\//,
+    /^@src\/utils\//,
+    /^@src\/data\/fieldTypesConfig/,
+  ])
+
+  const tableResult = getFileDepHash(
     './src/components/Table/Table.tsx',
-    [
-      /^@src\/state\//,
-      /^@src\/api\//,
-      /^@src\/utils\//,
-      /^@src\/data\/fieldTypesConfig/,
-    ],
+    root,
+    fileDepHash2,
   )
 
   expect(tableResult.importsMap.length).toEqual(199)
 
-  const cache = getSimplifiedSortedCodeDepsCache()
+  const cache = getSortedCodeDepsCache(root + 'src/', fileDepHash2)
 
   const uncached = cache
     .filter((entry) => !entry.imports)
