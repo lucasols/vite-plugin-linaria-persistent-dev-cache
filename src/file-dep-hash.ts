@@ -16,7 +16,6 @@ interface FileDepHashConfig {
   exclude: RegExp[]
   aliases: Aliases
   rootDir: string
-  disableDepCache?: boolean
   resolveRelative?: boolean
 }
 
@@ -55,25 +54,30 @@ function getImportsFromCode(
 
 function getResolvedPath(
   filePath: string,
-  { aliases, rootDir, resolveCache }: InstanceProps,
+  { aliases, rootDir, resolveCache, resolveRelative }: InstanceProps,
+  resolveRelativeFrom: string,
 ): string | false {
-  if (resolveCache.has(filePath)) {
+  if (!resolveRelative && resolveCache.has(filePath)) {
     return resolveCache.get(filePath)!
   }
 
   let normalizedPath = filePath
 
-  for (const { find, replacement } of aliases) {
-    if (
-      typeof find === 'string'
-        ? normalizedPath.startsWith(find)
-        : find.test(normalizedPath)
-    ) {
-      normalizedPath = normalizedPath.replace(find, replacement)
+  if (resolveRelative) {
+    normalizedPath = path.resolve(path.dirname(resolveRelativeFrom), filePath)
+  } else {
+    for (const { find, replacement } of aliases) {
+      if (
+        typeof find === 'string'
+          ? normalizedPath.startsWith(find)
+          : find.test(normalizedPath)
+      ) {
+        normalizedPath = normalizedPath.replace(find, replacement)
+      }
     }
-  }
 
-  normalizedPath = path.posix.join(rootDir, normalizedPath)
+    normalizedPath = path.posix.join(rootDir, normalizedPath)
+  }
 
   const fileName = path.basename(normalizedPath)
 
@@ -97,6 +101,7 @@ function getResolvedPath(
 function getCodeFromResolvedPath(
   resolvedPath: string,
   config: InstanceProps,
+  resolveRelativeFrom: string,
 ): string {
   let code: string
 
@@ -107,10 +112,18 @@ function getCodeFromResolvedPath(
       if (resolved === resolvedPath) {
         config.resolveCache.delete(unresolved)
 
-        const resolvedPath = getResolvedPath(unresolved, config)
+        const resolvedPath = getResolvedPath(
+          unresolved,
+          config,
+          resolveRelativeFrom,
+        )
 
         if (resolvedPath) {
-          return getCodeFromResolvedPath(resolvedPath, config)
+          return getCodeFromResolvedPath(
+            resolvedPath,
+            config,
+            resolveRelativeFrom,
+          )
         }
       }
     }
@@ -141,13 +154,17 @@ type Debug = {
   getAllCodeDepsCalls: number
 }
 
-function getEdges(code: string, config: InstanceProps): string[] {
+function getEdges(
+  code: string,
+  parentFileId: string,
+  config: InstanceProps,
+): string[] {
   const imports = getImportsFromCode(code, config)
 
   const edges: string[] = []
 
   for (const importPath of imports) {
-    const resolvedFiledId = getResolvedPath(importPath, config)
+    const resolvedFiledId = getResolvedPath(importPath, config, parentFileId)
 
     if (!resolvedFiledId) {
       continue
@@ -199,7 +216,7 @@ function getAllCodeDeps(
   visited.set(fileId, code)
   inPath.add(fileId)
 
-  const edges = getEdges(code, config)
+  const edges = getEdges(code, fileId, config)
 
   const deps = new Map<string, string>()
 
@@ -216,7 +233,7 @@ function getAllCodeDeps(
     let edgeCode: string
 
     if (!visited.has(edge)) {
-      edgeCode = getCodeFromResolvedPath(edge, config)
+      edgeCode = getCodeFromResolvedPath(edge, config, fileId)
 
       edgeHasCircularDep = getAllCodeDeps(
         edge,
