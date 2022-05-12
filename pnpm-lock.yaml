@@ -6,9 +6,14 @@ specifiers:
   '@types/node': ^17.0.9
   '@vitest/ui': 0.10.2
   tslib: ^2.4.0
+  tsm: ^2.2.1
   typescript: ^4.6.4
+  v8-profiler-next: ^1.5.1
   vite: 2.9.7
   vitest: 0.10.2
+
+dependencies:
+  v8-profiler-next: 1.5.1
 
 devDependencies:
   '@linaria/babel-preset': 3.0.0-beta.18
@@ -16,6 +21,7 @@ devDependencies:
   '@types/node': 17.0.23
   '@vitest/ui': 0.10.2
   tslib: 2.4.0
+  tsm: 2.2.1
   typescript: 4.6.4
   vite: 2.9.7
   vitest: 0.10.2_@vitest+ui@0.10.2
@@ -597,6 +603,10 @@ packages:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
     dev: true
 
+  /nan/2.15.0:
+    resolution: {integrity: sha512-8ZtvEnA2c5aYCZYd1cvgdnU6cqwixRoYg70xPLWUws5ORTa/lnw+u4amixRS/Ac5U5mQVgp9pnlSUnbNWFaWZQ==}
+    dev: false
+
   /nanoid/3.3.4:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -722,6 +732,14 @@ packages:
     resolution: {integrity: sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==}
     dev: true
 
+  /tsm/2.2.1:
+    resolution: {integrity: sha512-qvJB0baPnxQJolZru11mRgGTdNlx17WqgJnle7eht3Vhb+VUR4/zFA5hFl6NqRe7m8BD9w/6yu0B2XciRrdoJA==}
+    engines: {node: '>=12'}
+    hasBin: true
+    dependencies:
+      esbuild: 0.14.31
+    dev: true
+
   /type-detect/4.0.8:
     resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
     engines: {node: '>=4'}
@@ -732,6 +750,13 @@ packages:
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
+
+  /v8-profiler-next/1.5.1:
+    resolution: {integrity: sha512-7gnfJ3x7zN3gzmVs69OvJBNze5dLCIeY2Necy+IzomWmprSCRsBbCn5GfwAJHkWJxzoex3gyRexxvYGlgR93yg==}
+    requiresBuild: true
+    dependencies:
+      nan: 2.15.0
+    dev: false
 
   /vite/2.9.7:
     resolution: {integrity: sha512-5hH7aNQe8rJiTTqCtPNX/6mIKlGw+1wg8UXwAxDIIN8XaSR+Zx3GT2zSu7QKa1vIaBqfUODGh3vpwY8r0AW/jw==}

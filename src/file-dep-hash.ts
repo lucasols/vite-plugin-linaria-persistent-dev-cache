@@ -7,7 +7,7 @@ function generateStringHash(str: string) {
 }
 
 type Aliases = {
-  find: string
+  find: string | RegExp
   replacement: string
 }[]
 
@@ -53,7 +53,11 @@ function getResolvedPath(
   let normalizedPath = filePath
 
   for (const { find, replacement } of aliases) {
-    if (normalizedPath.startsWith(find)) {
+    if (
+      typeof find === 'string'
+        ? normalizedPath.startsWith(find)
+        : find.test(normalizedPath)
+    ) {
       normalizedPath = normalizedPath.replace(find, replacement)
     }
   }
@@ -77,6 +81,34 @@ function getResolvedPath(
   }
 
   return false
+}
+
+function getCodeFromResolvedPath(
+  resolvedPath: string,
+  aliases: Aliases,
+  rootDir: string,
+): string {
+  let code: string
+
+  try {
+    code = fs.readFileSync(resolvedPath, 'utf8')
+  } catch (e) {
+    for (const [unresolved, resolved] of resolveCache) {
+      if (resolved === resolvedPath) {
+        resolveCache.delete(unresolved)
+
+        const resolvedPath = getResolvedPath(unresolved, aliases, rootDir)
+
+        if (resolvedPath) {
+          return getCodeFromResolvedPath(resolvedPath, aliases, rootDir)
+        }
+      }
+    }
+
+    throw e
+  }
+
+  return code
 }
 
 type CodeDependency = {
@@ -181,7 +213,7 @@ function getAllCodeDeps(
     let edgeCode: string
 
     if (!visited.has(edge)) {
-      edgeCode = fs.readFileSync(edge, 'utf8')
+      edgeCode = getCodeFromResolvedPath(edge, aliases, rootDir)
 
       edgeHasCircularDep = getAllCodeDeps(
         edge,
@@ -297,7 +329,6 @@ export function getCodeHash(
   importsMap: CodeDependency[]
   debug: Debug
 } {
-  // FIX: make debug optional
   const debug: Debug = {
     cached: 0,
     notCached: 0,
