@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { testOnly } from '../src/file-dep-hash'
+import { testOnly } from '../src/fileDepHash'
 import fs from 'fs'
 import path from 'path'
 

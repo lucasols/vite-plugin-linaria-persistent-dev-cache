@@ -7,7 +7,7 @@ import { EvalCache, Module, slugify, transform } from '@linaria/babel-preset'
 import path from 'path'
 import { Plugin, ResolvedConfig, normalizePath } from 'vite'
 import { createPersistentCache } from './persistentCache'
-import { cleanCodeDepsCacheForFile, getCodeHash } from './file-dep-hash'
+import { cleanCodeDepsCacheForFile, getCodeHash } from './fileDepHash'
 
 type RollupPluginOptions = {
   sourceMap?: boolean

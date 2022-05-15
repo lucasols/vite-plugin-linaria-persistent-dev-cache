@@ -1,6 +1,6 @@
 import path from 'path'
 import { beforeEach, describe, expect, test } from 'vitest'
-import { testOnly } from '../src/file-dep-hash'
+import { testOnly } from '../src/fileDepHash'
 import { getSortedCodeDepsCache } from './utils/getSortedImports'
 import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 

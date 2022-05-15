@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { expect, test } from 'vitest'
-import { createFileDepHash } from '../src/file-dep-hash'
+import { createFileDepHash } from '../src/fileDepHash'
 import {
   getSortedCodeDepsCache,
   getSortedImports,

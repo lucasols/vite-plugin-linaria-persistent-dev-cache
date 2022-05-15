@@ -1,10 +1,6 @@
-import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
-
-function generateStringHash(str: string) {
-  return crypto.createHash('sha1').update(str).digest('hex')
-}
+import { generateStringHash } from './utils'
 
 type Aliases = {
   find: string | RegExp

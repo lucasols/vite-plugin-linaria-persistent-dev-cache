@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { createFileDepHash, FileDepHashInstance } from '../../src/file-dep-hash'
+import { createFileDepHash, FileDepHashInstance } from '../../src/fileDepHash'
 
 const defaultInclude = [/^@src\//, /^@utils\//]
 const defaultAliases = [

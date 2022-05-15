@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export function mapEmplace<K, V>(
   map: Map<K, V>,
   key: K,
@@ -23,4 +25,8 @@ export function mapEmplace<K, V>(
   }
 
   return map.get(key)!
+}
+
+export function generateStringHash(str: string) {
+  return crypto.createHash('sha1').update(str).digest('hex')
 }

@@ -1,3 +1,3 @@
-test/___mocks___/private
+test/__mocks__/private
 node_modules
 table.cpuprofile

@@ -1,6 +1,6 @@
 import fs from 'fs'
 import v8Profiler from 'v8-profiler-next'
-import { resetCodeDepsCache, testOnly } from '../src/file-dep-hash'
+import { resetCodeDepsCache, testOnly } from '../src/fileDepHash'
 import { getFileDepHash } from './utils/setup'
 
 const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
