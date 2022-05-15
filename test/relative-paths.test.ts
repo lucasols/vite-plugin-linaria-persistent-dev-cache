@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import { expect, test } from 'vitest'
 import { createFileDepHash } from '../src/fileDepHash'
 import {
@@ -6,11 +7,13 @@ import {
   getSortedImports,
 } from './utils/getSortedImports'
 
-const root =
-  'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/src/relative'
+const root = `${__dirname}/__mocks__/public/src/relative`
 
-function getSimplifiedSortedImports(imports: { fileId: string }[]) {
-  return getSortedImports(imports, '')
+function getSimplifiedSortedImports(
+  imports: { fileId: string }[],
+  alternativeRoot = root,
+) {
+  return getSortedImports(imports, alternativeRoot)
 }
 
 const fileDepHash = createFileDepHash({
@@ -32,34 +35,37 @@ function getFileDepHash() {
 test('resolve relative imports', () => {
   const result = getFileDepHash()
 
+  const relativeRoot = path.normalize(process.cwd())
+
   expect(result.importsMap.length).toEqual(2)
-  expect(getSimplifiedSortedImports(result.importsMap)).toMatchInlineSnapshot(`
+  expect(getSimplifiedSortedImports(result.importsMap, relativeRoot))
+    .toMatchInlineSnapshot(`
     [
-      "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
-      "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
+      "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
+      "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
     ]
   `)
   expect(result.hash).toMatchInlineSnapshot(
-    '"cb412c8ef8911ca8b9ec69794418dec56cd296dd||59a96030a7fdc0772c57d6b7a42971b552760f8c"',
+    '"cb412c8ef8911ca8b9ec69794418dec56cd296dd||f3bf3a1375175076ebf01cfe363dfb2b31ed2a43"',
   )
 
-  expect(getSortedCodeDepsCache(root, fileDepHash)).toMatchInlineSnapshot(`
+  expect(getSortedCodeDepsCache(root, fileDepHash, relativeRoot)).toMatchInlineSnapshot(`
     [
       {
         "fileId": "/vite.config.ts",
         "imports": [
-          "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
-          "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
+          "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
+          "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
         ],
       },
       {
-        "fileId": "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
+        "fileId": "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
         "imports": [
-          "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
+          "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
         ],
       },
       {
-        "fileId": "C:\\\\Users\\\\lucas\\\\Github\\\\file-dep-hash\\\\test\\\\___mocks___\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
+        "fileId": "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
         "imports": [],
       },
     ]

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "test:ui": "vitest --changed --ui",
+    "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "bench-file-dep-hash": "tsm ./test/benchs.ts",
     "build": "vitest run && vite build"

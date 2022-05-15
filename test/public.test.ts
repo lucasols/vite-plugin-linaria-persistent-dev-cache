@@ -5,7 +5,7 @@ import {
 } from './utils/getSortedImports'
 import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 
-const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/'
+const root = `${__dirname}/__mocks__/public/`
 
 const fileDepHash = createFileDeepHashInstance(root)
 

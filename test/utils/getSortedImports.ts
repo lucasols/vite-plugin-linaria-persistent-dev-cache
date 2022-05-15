@@ -13,9 +13,20 @@ export function getSortedImports(
     .sort()
 }
 
+function replaceRoot(path: string, root: string, root2: string) {
+  const firstReplace = path.replace(root, '')
+
+  if (firstReplace !== path) {
+    return firstReplace
+  }
+
+  return path.replace(root2, '')
+}
+
 export function getSortedCodeDepsCache(
   root: string,
   deepHashInstance: FileDepHashInstance,
+  relativeRoot: string = '',
 ) {
   const codeDepsCache = deepHashInstance.getCodeDepsCache()
 
@@ -23,11 +34,13 @@ export function getSortedCodeDepsCache(
 
   for (const [fileId, cacheEntry] of codeDepsCache.entries()) {
     deps.push({
-      fileId: fileId.replace(root, ''),
+      fileId: replaceRoot(fileId, root, relativeRoot),
       imports:
         cacheEntry &&
         sortBy(
-          [...cacheEntry.depsId.values()].map((item) => item.replace(root, '')),
+          [...cacheEntry.depsId.values()].map((item) =>
+            item.replace(relativeRoot || root, ''),
+          ),
           (dep) => dep,
         ),
     })

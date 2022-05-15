@@ -5,7 +5,7 @@ import {
 } from './utils/getSortedImports'
 import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 
-const root = 'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/private'
+const root = `${__dirname}/__mocks__/private`
 
 const fileDepHash = createFileDeepHashInstance(root)
 
@@ -28,7 +28,7 @@ describe('get the correct deps for a file', () => {
     tableResult = getPrivateFileDepHash('./src/components/Table/Table.tsx')
     expect(tableResult.importsMap.length).toEqual(726)
 
-    expect(getSortedImports(tableResult.importsMap)).toMatchSnapshot()
+    expect(getSortedImports(tableResult.importsMap, root)).toMatchSnapshot()
   })
 
   test('result import values are not equal', () => {
@@ -44,7 +44,7 @@ describe('get the correct deps for a file', () => {
 
     expect(result.importsMap.length).toEqual(6)
 
-    expect(getSortedImports(result.importsMap)).toMatchSnapshot()
+    expect(getSortedImports(result.importsMap, root)).toMatchSnapshot()
   })
 
   test('MoreMenu deps', () => {
@@ -52,7 +52,7 @@ describe('get the correct deps for a file', () => {
 
     expect(result.importsMap.length).toEqual(29)
 
-    expect(getSortedImports(result.importsMap)).toMatchSnapshot()
+    expect(getSortedImports(result.importsMap, root)).toMatchSnapshot()
   })
 })
 

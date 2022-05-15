@@ -4,8 +4,7 @@ import fs from 'fs'
 import path from 'path'
 
 export function getImports(file: string) {
-  const root =
-    'C:/Users/lucas/Github/file-dep-hash/test/___mocks___/public/src/getImportsFromCode'
+  const root = `${__dirname}/__mocks__/public/src/getImportsFromCode`
   const fileId = path.posix.join(root, file)
 
   const code = fs.readFileSync(fileId, 'utf-8')
@@ -16,6 +15,9 @@ export function getImports(file: string) {
     exclude: [],
     aliases: [],
     rootDir: '.',
+    resolveCache: new Map(),
+    codeDepsCache: new Map(),
+    changedAfterInitialBuild: new Set(),
   })
 
   return result
