@@ -7,7 +7,7 @@ import { EvalCache, Module, slugify, transform } from '@linaria/babel-preset'
 import path from 'path'
 import { Plugin, ResolvedConfig, normalizePath } from 'vite'
 import { createPersistentCache } from './persistentCache'
-import { cleanCodeDepsCacheForFile, getCodeHash } from './fileDepHash'
+import { createFileDepHash, FileDepHashInstance } from './fileDepHash'
 
 type RollupPluginOptions = {
   sourceMap?: boolean
@@ -37,7 +37,10 @@ export default function linaria({
     cacheFilePath: persistentCachePath,
     viteConfigFilePath,
     lockFilePath,
+    rootDir: root,
   })
+
+  let fileDepHash: FileDepHashInstance
 
   function getVirtualName(slug: string) {
     return `@linaria-cache/${slug}.css`
@@ -47,6 +50,13 @@ export default function linaria({
     name: 'linaria',
     configResolved(resolvedConfig) {
       config = resolvedConfig
+
+      fileDepHash = createFileDepHash({
+        rootDir: root,
+        aliases: config.resolve.alias,
+        include,
+        exclude,
+      })
     },
     load(id: string) {
       return virtualCssFiles.get(id)
@@ -71,14 +81,7 @@ export default function linaria({
       let hash: string | false = false
 
       if (enablePersistentCache) {
-        cleanCodeDepsCacheForFile(id)
-
-        hash = getCodeHash(id, code, {
-          include,
-          exclude,
-          aliases: config.resolve.alias,
-          rootDir: root,
-        }).hash
+        hash = fileDepHash.getHash(id, code).hash
 
         const cached = persistentCache.getFile(hash)
 
@@ -90,9 +93,6 @@ export default function linaria({
           return cached
         }
       }
-
-      persistentCache.removeFile(id)
-      EvalCache.clearForFile(id)
 
       const originalResolver = Module._resolveFilename
 
@@ -126,7 +126,7 @@ export default function linaria({
       result.code += `\nimport ${JSON.stringify(filename)};\n`
 
       if (hash) {
-        persistentCache.addFile(hash, {
+        persistentCache.addFile(hash, id, {
           code: result.code,
           cssText,
           map: result.sourceMap,
@@ -135,6 +135,18 @@ export default function linaria({
       }
 
       return { code: result.code, map: result.sourceMap }
+    },
+    handleHotUpdate({ file }) {
+      fileDepHash.cleanCacheForFile(file)
+      // FIX: eval cache is working?
+      EvalCache.clearForFile(file)
+
+      if (file.endsWith(lockFilePath)) {
+        persistentCache.checkConfigFiles()
+      }
+    },
+    buildStart() {
+      persistentCache.checkConfigFiles()
     },
   }
 }

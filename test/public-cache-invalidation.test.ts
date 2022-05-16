@@ -86,8 +86,11 @@ test('invalidates cache of a file with circular dependency', () => {
 })
 
 describe('emulate vite behaviour', () => {
-  function emulateViteTransform(file: string) {
+  function startHotReload(file: string) {
     fileDepHash.cleanCacheForFile(getFileId(file))
+  }
+
+  function emulateViteTransform(file: string) {
     getPublicFileDepHash(file)
   }
 
@@ -137,17 +140,17 @@ describe('emulate vite behaviour', () => {
     expect(getSimplifiedSortedCodeDepsCache()).toStrictEqual(cache)
 
     emulateViteTransform('./src/simple5/Popover.ts')
-    emulateViteTransform('./src/simple5/PortalLayer.ts')
     emulateViteTransform('./src/simple5/typings.ts')
     emulateViteTransform('./src/simple5/useDelayValueUpdate.ts')
-    emulateViteTransform('./src/simple5/useTimeout.ts')
     emulateViteTransform('./src/simple5/useOnClickOutiside.ts')
+    emulateViteTransform('./src/simple5/PortalLayer.ts')
+    emulateViteTransform('./src/simple5/useTimeout.ts')
 
     expect(getSimplifiedSortedCodeDepsCache()).toStrictEqual(cache)
   })
 
   test('update file useOnClickOutiside.ts', () => {
-    emulateViteTransform('./src/simple5/useOnClickOutiside.ts')
+    startHotReload('./src/simple5/useOnClickOutiside.ts')
 
     expect(getSimplifiedSortedCodeDepsCache()).toStrictEqual([
       {
@@ -167,16 +170,16 @@ describe('emulate vite behaviour', () => {
         imports: ['simple5/typings.ts', 'simple5/useTimeout.ts'],
       },
       {
-        fileId: 'simple5/useOnClickOutiside.ts',
-        imports: [],
-      },
-      {
         fileId: 'simple5/useTimeout.ts',
         imports: ['simple5/typings.ts'],
       },
     ])
 
     emulateViteTransform('./src/simple5/Dropdown.ts')
+
+    expect(getSimplifiedSortedCodeDepsCache()).toStrictEqual(cache)
+
+    emulateViteTransform('./src/simple5/useOnClickOutiside.ts')
 
     expect(getSimplifiedSortedCodeDepsCache()).toStrictEqual(cache)
   })

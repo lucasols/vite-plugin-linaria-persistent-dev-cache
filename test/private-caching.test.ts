@@ -46,8 +46,6 @@ describe('caches the deps of previous calls', () => {
       expect(tableResult2.importsMap.length, 'num of deps').toEqual(726)
 
       console.log('second call', tableResult2.debug.timing)
-
-      expect(tableResult2.debug.timing).toBeLessThan(30)
     })
 
     test('Dropdown', () => {

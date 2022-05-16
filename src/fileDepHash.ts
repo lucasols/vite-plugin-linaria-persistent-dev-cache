@@ -18,7 +18,6 @@ interface FileDepHashConfig {
 interface InstanceProps extends FileDepHashConfig {
   resolveCache: Map<string, string>
   codeDepsCache: Map<string, CacheEntry>
-  changedAfterInitialBuild: Set<string>
 }
 
 function getImportsFromCode(
@@ -312,13 +311,8 @@ function populateDepsArray(
 
 function cleanCodeDepsCacheForFile(
   fileId: string,
-  { changedAfterInitialBuild, codeDepsCache }: InstanceProps,
+  { codeDepsCache }: InstanceProps,
 ) {
-  if (!changedAfterInitialBuild.has(fileId)) {
-    changedAfterInitialBuild.add(fileId)
-    return
-  }
-
   for (const [id, cacheEntry] of codeDepsCache.entries()) {
     if (fileId === id) {
       codeDepsCache.delete(id)
@@ -389,7 +383,6 @@ export function createFileDepHash(
     ...config,
     resolveCache,
     codeDepsCache,
-    changedAfterInitialBuild,
   }
 
   function resetCache() {
