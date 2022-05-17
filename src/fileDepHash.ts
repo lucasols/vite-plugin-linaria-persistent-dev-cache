@@ -359,7 +359,7 @@ function getCodeHash(
   debug.timing = Date.now() - start
 
   return {
-    hash: `${codeHash}||${generateStringHash(importsHash)}`,
+    hash: `${codeHash}||${importsHash && generateStringHash(importsHash)}`,
     importsMap: importsMap.deps,
     debug,
   }

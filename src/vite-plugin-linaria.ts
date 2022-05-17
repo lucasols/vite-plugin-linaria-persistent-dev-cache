@@ -13,34 +13,45 @@ type RollupPluginOptions = {
   sourceMap?: boolean
   persistentCachePath?: string
   disableDevPersistentCache?: boolean
-  include?: RegExp[]
+  include: RegExp[]
   exclude?: RegExp[]
   lockFilePath: string
   viteConfigFilePath?: string
+  debug?: boolean
 }
 
 export default function linaria({
   sourceMap,
-  persistentCachePath = '.linaria-cache/cache.json',
+  persistentCachePath = './node_modules/.linaria-cache/cache.json',
   disableDevPersistentCache,
-  include = [],
+  include,
   exclude = [],
-  viteConfigFilePath = 'vite.config.js',
+  viteConfigFilePath = './vite.config.ts',
   lockFilePath,
+  debug,
 }: RollupPluginOptions): Plugin {
   const root = normalizePath(process.cwd())
   let config: ResolvedConfig
 
   const virtualCssFiles = new Map<string, string>()
 
+  const lockFileAbsPath = normalizePath(path.resolve(root, lockFilePath))
+
   const persistentCache = createPersistentCache({
     cacheFilePath: persistentCachePath,
-    viteConfigFilePath,
-    lockFilePath,
+    viteConfigFilePath: path.resolve(root, viteConfigFilePath),
+    lockFilePath: lockFileAbsPath,
     rootDir: root,
+    debug,
   })
 
   let fileDepHash: FileDepHashInstance
+
+  function debugLog(...args: any[]) {
+    if (debug) {
+      console.log('[linaria]', ...args)
+    }
+  }
 
   function getVirtualName(slug: string) {
     return `@linaria-cache/${slug}.css`
@@ -86,6 +97,8 @@ export default function linaria({
         const cached = persistentCache.getFile(hash)
 
         if (cached) {
+          debugLog(`${path.relative(root, id)} cached`)
+
           const filename = getVirtualName(cached.cssSlug)
 
           virtualCssFiles.set(filename, cached.cssText)
@@ -141,7 +154,7 @@ export default function linaria({
       // FIX: eval cache is working?
       EvalCache.clearForFile(file)
 
-      if (file.endsWith(lockFilePath)) {
+      if (file === lockFileAbsPath) {
         persistentCache.checkConfigFiles()
       }
     },

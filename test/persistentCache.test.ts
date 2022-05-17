@@ -14,18 +14,18 @@ function mockWriteFile(path: string, data: string) {
 }
 
 function addDefaultFiles() {
-  mockedFS.set('/vite.config.ts', 'const foo = "bar"')
-  mockedFS.set('/pnpm-lock', 'const foo = "bar"')
+  mockedFS.set('C:\\User\\vite.config.ts', 'const foo = "bar"')
+  mockedFS.set('C:\\User\\pnpm-lock', 'const foo = "bar"')
 }
 
 const defaultConfig = {
   cacheFilePath: '.linaria-cache/cache.json',
-  viteConfigFilePath: '/vite.config.ts',
-  lockFilePath: '/pnpm-lock',
+  viteConfigFilePath: './vite.config.ts',
+  lockFilePath: './pnpm-lock',
   _readFile: mockReadFile,
   _writeFile: mockWriteFile,
   _writeDebounce: 10,
-  rootDir: '/',
+  rootDir: 'C:/User',
   _getNow: () => new Date('2022-05-16').getTime(),
 }
 
@@ -402,7 +402,7 @@ describe('clean build cache over time', () => {
 
       // change lock file
 
-      mockedFS.set('/pnpm-lock', 'const foo = "bar2"')
+      mockedFS.set('C:\\User\\pnpm-lock', 'const foo = "bar2"')
 
       persistentCache.checkConfigFiles()
 
@@ -422,7 +422,7 @@ describe('clean build cache over time', () => {
     test('reset cache if vite config changed', async () => {
       const persistentCache = getPersistentCache()
 
-      mockedFS.set('/vite.config.ts', 'const foo = "bar2"')
+      mockedFS.set('C:\\User\\vite.config.ts', 'const foo = "bar2"')
 
       persistentCache.checkConfigFiles()
 
