@@ -14,8 +14,8 @@ function mockWriteFile(path: string, data: string) {
 }
 
 function addDefaultFiles() {
-  mockedFS.set('C:\\User\\vite.config.ts', 'const foo = "bar"')
-  mockedFS.set('C:\\User\\pnpm-lock', 'const foo = "bar"')
+  mockedFS.set('./vite.config.ts', 'const foo = "bar"')
+  mockedFS.set('./pnpm-lock', 'const foo = "bar"')
 }
 
 const defaultConfig = {
@@ -25,7 +25,7 @@ const defaultConfig = {
   _readFile: mockReadFile,
   _writeFile: mockWriteFile,
   _writeDebounce: 10,
-  rootDir: 'C:/User',
+  rootDir: '',
   _getNow: () => new Date('2022-05-16').getTime(),
 }
 
@@ -93,9 +93,10 @@ test('adding cache files', async () => {
 
   expect(
     matchValuePattern(getCache(), {
+      version: 1,
+      rootDir: '',
       lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
-      viteConfigHash:
-        '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
+      viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
       results: {
         hashfile1: {
           code: 'const a = 1',
@@ -149,6 +150,8 @@ describe('clean build cache over time', () => {
     mockedFS.set(
       '.linaria-cache/cache.json',
       JSON.stringify({
+        version: 1,
+        rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
           '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
@@ -201,6 +204,8 @@ describe('clean build cache over time', () => {
 
     expect(
       matchValuePattern(getCache(), {
+        version: 1,
+        rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
           '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
@@ -244,6 +249,8 @@ describe('clean build cache over time', () => {
     mockedFS.set(
       '.linaria-cache/cache.json',
       JSON.stringify({
+        version: 1,
+        rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
           '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
@@ -314,6 +321,8 @@ describe('clean build cache over time', () => {
 
     expect(
       matchValuePattern(getCache(), {
+        version: 1,
+        rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
           '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
@@ -350,9 +359,11 @@ describe('clean build cache over time', () => {
       mockedFS.set(
         '.linaria-cache/cache.json',
         JSON.stringify({
+          version: 1,
+          rootDir: '',
           lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
           viteConfigHash:
-            '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
+            '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
           results: {
             hashfile1: {
               code: 'const a = 1',
@@ -381,9 +392,10 @@ describe('clean build cache over time', () => {
 
       expect(
         matchValuePattern(getCache(), {
+          version: 1,
+          rootDir: '',
           lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
-          viteConfigHash:
-            '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
+          viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
           results: {
             hashfile1: {
               code: 'const a = 1',
@@ -402,7 +414,7 @@ describe('clean build cache over time', () => {
 
       // change lock file
 
-      mockedFS.set('C:\\User\\pnpm-lock', 'const foo = "bar2"')
+      mockedFS.set('./pnpm-lock', 'const foo = "bar2"')
 
       persistentCache.checkConfigFiles()
 
@@ -410,9 +422,10 @@ describe('clean build cache over time', () => {
 
       expect(
         matchValuePattern(getCache(), {
+          version: 1,
+          rootDir: '',
           lockFileHash: '43693d6a2989cc9610ddf229f7a503e92a393b5f',
-          viteConfigHash:
-            '6fee57c71ec34e564ab21fd17da6a1559eb23766||da39a3ee5e6b4b0d3255bfef95601890afd80709',
+          viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
           results: {},
           fileHashes: {},
         }),
@@ -422,7 +435,7 @@ describe('clean build cache over time', () => {
     test('reset cache if vite config changed', async () => {
       const persistentCache = getPersistentCache()
 
-      mockedFS.set('C:\\User\\vite.config.ts', 'const foo = "bar2"')
+      mockedFS.set('./vite.config.ts', 'const foo = "bar2"')
 
       persistentCache.checkConfigFiles()
 
@@ -430,9 +443,10 @@ describe('clean build cache over time', () => {
 
       expect(
         matchValuePattern(getCache(), {
+          version: 1,
+          rootDir: '',
           lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
-          viteConfigHash:
-            '43693d6a2989cc9610ddf229f7a503e92a393b5f||da39a3ee5e6b4b0d3255bfef95601890afd80709',
+          viteConfigHash: '43693d6a2989cc9610ddf229f7a503e92a393b5f||',
           results: {},
           fileHashes: {},
         }),

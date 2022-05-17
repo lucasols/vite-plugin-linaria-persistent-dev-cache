@@ -10,9 +10,9 @@ export default defineConfig({
   build: {
     lib: {
       formats: ['es'],
-      entry: resolvePath('src/file-dep-hash.ts'),
-      name: 'file-dep-hash',
-      fileName: (format) => `file-dep-hash.${format}.js`,
+      entry: resolvePath('src/vite-plugin-linaria.ts'),
+      name: 'vite-plugin-linaria',
+      fileName: (format) => `vite-plugin-linaria.${format}.js`,
     },
     rollupOptions: {
       external: ['fs', 'path', 'crypto'],
