@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "moduleResolution": "node",
-    "module": "ESNext",
+    "module": "CommonJS",
     "jsx": "preserve",
     "skipLibCheck": true,
     "noEmit": true,

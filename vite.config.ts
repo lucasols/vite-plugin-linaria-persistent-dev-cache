@@ -3,19 +3,20 @@
 import path from 'path'
 import { defineConfig, Plugin } from 'vite'
 import typescript from '@rollup/plugin-typescript'
+import dts from 'rollup-plugin-dts'
 
 const resolvePath = (str: string) => path.resolve(__dirname, str)
 
 export default defineConfig({
   build: {
+    target: 'esnext',
     lib: {
-      formats: ['es'],
       entry: resolvePath('src/vite-plugin-linaria.ts'),
       name: 'vite-plugin-linaria',
       fileName: (format) => `vite-plugin-linaria.${format}.js`,
     },
     rollupOptions: {
-      external: ['fs', 'path', 'crypto'],
+      external: ['fs', 'path', 'crypto', 'vite', '@linaria/babel-preset'],
       plugins: [
         removeTestExports(),
         typescript({

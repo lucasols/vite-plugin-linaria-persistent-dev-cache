@@ -1,4 +1,9 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/file-dep-hash.ts"]
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noEmit": false,
+    "declaration": true
+  },
+  "include": ["src/vite-plugin-linaria.ts"]
 }
