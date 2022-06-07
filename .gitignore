@@ -2,3 +2,4 @@ test/__mocks__/private
 node_modules
 table.cpuprofile
 dist
+cache.json
