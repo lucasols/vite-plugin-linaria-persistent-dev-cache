@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { createPersistentCache } from '../src/persistentCache'
 import { matchValuePattern, valuePatterns } from './utils/matchValuePattern'
 import { sleep } from './utils/testUtils'
@@ -98,7 +98,6 @@ test('adding cache files', async () => {
       results: {
         hashfile1: {
           code: 'const a = 1',
-          cssSlug: 'slug',
           cssText: 'css',
           fileId: 'file1',
           map: null,
@@ -106,7 +105,6 @@ test('adding cache files', async () => {
         },
         hashfile2: {
           code: 'const a = 2',
-          cssSlug: 'slug',
           cssText: 'css',
           fileId: 'file2',
           map: null,
@@ -114,7 +112,6 @@ test('adding cache files', async () => {
         },
         hashfile3: {
           code: 'const a = 3',
-          cssSlug: 'slug',
           cssText: 'css',
           fileId: 'file3',
           map: null,
@@ -132,7 +129,6 @@ test('adding cache files', async () => {
   expect(
     matchValuePattern(persistentCache.getFile('hashfile1'), {
       code: 'const a = 1',
-      cssSlug: 'slug',
       cssText: 'css',
       fileId: 'file1',
       map: null,
@@ -156,7 +152,6 @@ describe('clean build cache over time', () => {
         results: {
           hashfile1: {
             code: 'const a = 1',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file1',
             map: null,
@@ -164,7 +159,6 @@ describe('clean build cache over time', () => {
           },
           hashfile2: {
             code: 'const a = 2',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file2',
             map: null,
@@ -172,7 +166,6 @@ describe('clean build cache over time', () => {
           },
           hashfile3: {
             code: 'const a = 3',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file3',
             map: null,
@@ -210,7 +203,6 @@ describe('clean build cache over time', () => {
         results: {
           hashfile2: {
             code: 'const a = 2',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file2',
             map: null,
@@ -218,7 +210,6 @@ describe('clean build cache over time', () => {
           },
           hashfile3: {
             code: 'const a = 3',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file3',
             map: null,
@@ -226,7 +217,6 @@ describe('clean build cache over time', () => {
           },
           hash1: {
             code: 'const a = 1',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file1',
             map: null,
@@ -255,7 +245,6 @@ describe('clean build cache over time', () => {
         results: {
           hashfile1: {
             code: 'const a = 1',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file1',
             map: null,
@@ -263,7 +252,6 @@ describe('clean build cache over time', () => {
           },
           hashfile2: {
             code: 'const a = 2',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file2',
             map: null,
@@ -271,7 +259,6 @@ describe('clean build cache over time', () => {
           },
           hashfile3: {
             code: 'const a = 3',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file3',
             map: null,
@@ -279,7 +266,6 @@ describe('clean build cache over time', () => {
           },
           hashfile4: {
             code: 'const a = 4',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file4',
             map: null,
@@ -287,7 +273,6 @@ describe('clean build cache over time', () => {
           },
           hashfile5: {
             code: 'const a = 5',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file5',
             map: null,
@@ -327,7 +312,6 @@ describe('clean build cache over time', () => {
         results: {
           hash3: {
             code: 'const a = 1',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file3',
             map: null,
@@ -335,7 +319,6 @@ describe('clean build cache over time', () => {
           },
           hashfile5: {
             code: 'const a = 5',
-            cssSlug: 'slug',
             cssText: 'css',
             fileId: 'file5',
             map: null,
@@ -364,7 +347,6 @@ describe('clean build cache over time', () => {
           results: {
             hashfile1: {
               code: 'const a = 1',
-              cssSlug: 'slug',
               cssText: 'css',
               fileId: 'file1',
               map: null,
@@ -396,7 +378,6 @@ describe('clean build cache over time', () => {
           results: {
             hashfile1: {
               code: 'const a = 1',
-              cssSlug: 'slug',
               cssText: 'css',
               fileId: 'file1',
               map: null,
