@@ -4,13 +4,12 @@ import path from 'path'
 import { createFileDepHash } from './fileDepHash'
 import { generateStringHash } from './utils'
 
-const cacheFormatVersion = 1
+const cacheFormatVersion = 2
 
 interface FileEntry {
   code: string
   map: Result['sourceMap']
   cssText: string
-  cssSlug: string
 }
 
 interface CacheEntry extends FileEntry {

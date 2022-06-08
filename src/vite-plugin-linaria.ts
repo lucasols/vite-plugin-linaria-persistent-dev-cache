@@ -53,8 +53,8 @@ export default function linaria({
     }
   }
 
-  function getVirtualName(slug: string) {
-    return `@linaria-cache/${slug}.css`
+  function getVirtualName(id: string) {
+    return `@linaria-cache/${slugify(id)}.css`
   }
 
   return {
@@ -99,9 +99,9 @@ export default function linaria({
         if (cached) {
           debugLog(`${path.relative(root, id)} cached`)
 
-          const filename = getVirtualName(cached.cssSlug)
+          const virtualName = getVirtualName(id)
 
-          virtualCssFiles.set(filename, cached.cssText)
+          virtualCssFiles.set(virtualName, cached.cssText)
 
           return cached
         }
@@ -126,24 +126,22 @@ export default function linaria({
 
       let { cssText } = result
 
-      const slug = slugify(cssText)
-      const filename = getVirtualName(slugify(id))
+      const virtualName = getVirtualName(id)
 
       if (sourceMap && result.cssSourceMapText) {
         const map = Buffer.from(result.cssSourceMapText).toString('base64')
         cssText += `/*# sourceMappingURL=data:application/json;base64,${map}*/`
       }
 
-      virtualCssFiles.set(filename, cssText)
+      virtualCssFiles.set(virtualName, cssText)
 
-      result.code += `\nimport ${JSON.stringify(filename)};\n`
+      result.code += `\nimport ${JSON.stringify(virtualName)};\n`
 
       if (hash) {
         persistentCache.addFile(hash, id, {
           code: result.code,
           cssText,
           map: result.sourceMap,
-          cssSlug: slug,
         })
       }
 
