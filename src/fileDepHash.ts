@@ -276,7 +276,7 @@ function getAllCodeDeps(
     }
     //
     else {
-      debug.notCached
+      debug.notCached++
       config.codeDepsCache.set(fileId, false)
     }
   }
@@ -335,15 +335,8 @@ function getCodeHash(
   fileId: string,
   code: string,
   config: InstanceProps,
+  debug: Debug,
 ): CodeHashResult {
-  const debug: Debug = {
-    cached: 0,
-    notCached: 0,
-    addedToCache: 0,
-    timing: 0,
-    getAllCodeDepsCalls: 0,
-  }
-
   const start = Date.now()
 
   const importsMap = getAllCodeDeps(fileId, code, config, debug)
@@ -370,6 +363,7 @@ export type FileDepHashInstance = {
   getHash: (fileId: string, code: string) => CodeHashResult
   getCodeDepsCache: () => Map<string, CacheEntry>
   cleanCacheForFile: (fileId: string) => void
+  getUnoptimizedFiles: () => string[]
 }
 
 export function createFileDepHash(
@@ -385,6 +379,14 @@ export function createFileDepHash(
     codeDepsCache,
   }
 
+  const debug: Debug = {
+    cached: 0,
+    notCached: 0,
+    addedToCache: 0,
+    timing: 0,
+    getAllCodeDepsCalls: 0,
+  }
+
   function resetCache() {
     codeDepsCache.clear()
     changedAfterInitialBuild.clear()
@@ -394,12 +396,21 @@ export function createFileDepHash(
     return codeDepsCache
   }
 
+  function getStats() {
+    return {
+      unoptimizedFiles: [...codeDepsCache]
+        .filter(([id, cacheEntry]) => !cacheEntry)
+        .map(([id]) => id),
+      ...debug,
+    }
+  }
+
   function cleanCacheForFile(fileId: string) {
     cleanCodeDepsCacheForFile(fileId, instance)
   }
 
   function getHash(fileId: string, code: string): CodeHashResult {
-    return getCodeHash(fileId, code, instance)
+    return getCodeHash(fileId, code, instance, debug)
   }
 
   return {
@@ -407,6 +418,7 @@ export function createFileDepHash(
     getHash,
     getCodeDepsCache,
     cleanCacheForFile,
+    getUnoptimizedFiles: getStats,
   }
 }
 

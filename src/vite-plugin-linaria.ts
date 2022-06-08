@@ -55,62 +55,70 @@ export default function linaria({
 
   type StatsMode = 'create' | 'cached' | 'skiped'
 
-  let logStats:
-    | ((startTime: number, mode: StatsMode, file: string) => void)
-    | null = null
-  let hashingTime = 0
+  const debugStats: Record<
+    `${StatsMode}Time` | `${StatsMode}Count` | 'total' | 'hashingTime',
+    number
+  > = {
+    total: 0,
+    createTime: 0,
+    cachedTime: 0,
+    skipedTime: 0,
+    createCount: 0,
+    cachedCount: 0,
+    skipedCount: 0,
+    hashingTime: 0,
+  }
+
+  const uncachedFiles: Record<string, number> = {}
+  const uncachedFileHashs: Record<string, string> = {}
+  const skipedFiles: Record<string, number> = {}
+
+  let statsTimeout: any
+  function logStats(
+    startTime: number,
+    mode: StatsMode,
+    file: string,
+    hash: string | false,
+  ) {
+    const delta = Date.now() - startTime
+    debugStats.total += delta
+    debugStats[`${mode}Time`] += delta
+    debugStats[`${mode}Count`]++
+
+    if (mode === 'create') {
+      uncachedFiles[file] = delta
+
+      if (hash) {
+        uncachedFileHashs[file] = hash
+      }
+    }
+
+    if (mode === 'skiped') {
+      skipedFiles[file] = delta
+    }
+
+    clearTimeout(statsTimeout)
+    statsTimeout = setTimeout(() => {
+      console.info(debugStats, file)
+
+      fs.writeFileSync(
+        'linaria-plugin-stats.json',
+        JSON.stringify(
+          {
+            stats: debugStats,
+            uncachedFiles,
+            skipedFiles,
+            uncachedFileHashs,
+            deepHashStats: fileDepHash.getUnoptimizedFiles(),
+          },
+          null,
+          2,
+        ),
+      )
+    }, 2000)
+  }
 
   if (debug) {
-    const stats: Record<
-      `${StatsMode}Time` | `${StatsMode}Count` | 'total',
-      number
-    > = {
-      total: 0,
-      createTime: 0,
-      cachedTime: 0,
-      skipedTime: 0,
-      createCount: 0,
-      cachedCount: 0,
-      skipedCount: 0,
-    }
-
-    const uncachedFiles: string[] = []
-    const skipedFiles: string[] = []
-
-    let statsTimeout: any
-    logStats = (startTime, mode, file: string) => {
-      const delta = Date.now() - startTime
-      stats.total += delta
-      stats[`${mode}Time`] += delta
-      stats[`${mode}Count`]++
-
-      if (mode === 'create') {
-        uncachedFiles.push(file)
-      }
-
-      if (mode === 'skiped') {
-        skipedFiles.push(file)
-      }
-
-      clearTimeout(statsTimeout)
-      statsTimeout = setTimeout(() => {
-        const statsWithHashingTime = {
-          ...stats,
-          hashingTime,
-        }
-
-        console.info(statsWithHashingTime, file)
-
-        fs.writeFileSync(
-          'linaria-plugin-stats.json',
-          JSON.stringify(
-            { stats: statsWithHashingTime, uncachedFiles, skipedFiles },
-            null,
-            2,
-          ),
-        )
-      }, 2000)
-    }
   }
 
   return {
@@ -160,17 +168,17 @@ export default function linaria({
         hash = fileDepHash.getHash(id, code).hash
 
         if (debug) {
-          hashingTime += Date.now() - startTime
+          debugStats.hashingTime += Date.now() - startTime
         }
 
-        const cached = hash && persistentCache.getFile(hash)
+        const cached = persistentCache.getFile(hash)
 
         if (cached) {
           const virtualName = getVirtualName(id)
 
           virtualCssFiles.set(virtualName, cached.cssText)
 
-          logStats?.(startTime, 'cached', id)
+          logStats(startTime, 'cached', id, hash)
 
           return cached
         }
@@ -190,7 +198,7 @@ export default function linaria({
       Module._resolveFilename = originalResolver
 
       if (!result.cssText) {
-        logStats?.(startTime, 'skiped', id)
+        logStats(startTime, 'skiped', id, hash)
 
         return
       }
@@ -236,7 +244,7 @@ export default function linaria({
         })
       }
 
-      logStats?.(startTime, 'create', id)
+      logStats(startTime, 'create', id, hash)
 
       return { code: result.code, map: result.sourceMap }
     },

@@ -1,4 +1,3 @@
-import type { Result } from '@linaria/babel-preset'
 import fs from 'fs'
 import path from 'path'
 import { createFileDepHash } from './fileDepHash'
@@ -8,7 +7,7 @@ const cacheFormatVersion = 3
 
 interface FileEntry {
   code: string
-  map: Result['sourceMap']
+  map: any
   cssText: string
 }
 
@@ -106,12 +105,26 @@ export function createPersistentCache({
 
     debugLog('checking config files')
 
-    if (
-      persistentCache.version !== cacheFormatVersion ||
-      lockFileHash !== persistentCache.lockFileHash ||
-      viteConfigHash !== persistentCache.viteConfigHash
-    ) {
-      console.log('[linaria] Dev cache reseted')
+    let resetCache = false
+    let resetReason: string | null = null
+
+    if (persistentCache.version !== cacheFormatVersion) {
+      resetCache = true
+      resetReason = `cache format version changed from ${persistentCache.version} to ${cacheFormatVersion}`
+    }
+
+    if (!resetCache && persistentCache.lockFileHash !== lockFileHash) {
+      resetCache = true
+      resetReason = `lock file hash changed`
+    }
+
+    if (!resetCache && persistentCache.viteConfigHash !== viteConfigHash) {
+      resetCache = true
+      resetReason = `vite config file hash changed`
+    }
+
+    if (resetCache) {
+      console.log(`[linaria] Dev cache reseted: ${resetReason}`)
 
       persistentCache = {
         version: cacheFormatVersion,
