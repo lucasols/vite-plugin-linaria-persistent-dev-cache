@@ -4,7 +4,7 @@ import path from 'path'
 import { createFileDepHash } from './fileDepHash'
 import { generateStringHash } from './utils'
 
-const cacheFormatVersion = 2
+const cacheFormatVersion = 3
 
 interface FileEntry {
   code: string

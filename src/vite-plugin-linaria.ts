@@ -5,9 +5,9 @@
  */
 import { EvalCache, Module, slugify, transform } from '@linaria/babel-preset'
 import path from 'path'
-import { Plugin, ResolvedConfig, normalizePath } from 'vite'
-import { createPersistentCache } from './persistentCache'
+import { normalizePath, Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { createFileDepHash, FileDepHashInstance } from './fileDepHash'
+import { createPersistentCache } from './persistentCache'
 
 type RollupPluginOptions = {
   sourceMap?: boolean
@@ -32,6 +32,7 @@ export default function linaria({
 }: RollupPluginOptions): Plugin {
   const root = normalizePath(process.cwd())
   let config: ResolvedConfig
+  let server: ViteDevServer | undefined
 
   const virtualCssFiles = new Map<string, string>()
 
@@ -54,7 +55,7 @@ export default function linaria({
   }
 
   function getVirtualName(id: string) {
-    return `@linaria-cache/${slugify(id)}.css`
+    return `@linaria-css-cache/${slugify(id)}.css`
   }
 
   return {
@@ -69,11 +70,18 @@ export default function linaria({
         exclude,
       })
     },
+    configureServer(_server) {
+      server = _server
+    },
     load(id: string) {
       return virtualCssFiles.get(id)
     },
     resolveId(importee: string) {
       if (virtualCssFiles.has(importee)) return importee
+
+      if (importee.startsWith('/linaria-css-cache/')) {
+        return importee.replace('/linaria-css-cache/', '@linaria-css-cache/')
+      }
 
       return
     },
@@ -81,7 +89,7 @@ export default function linaria({
       if (
         id.includes('node_modules') ||
         virtualCssFiles.has(id) ||
-        !code.includes('@linaria')
+        !code.includes('@linaria/')
       ) {
         return
       }
@@ -133,9 +141,31 @@ export default function linaria({
         cssText += `/*# sourceMappingURL=data:application/json;base64,${map}*/`
       }
 
+      if (server) {
+        const module = server.moduleGraph.getModuleById(virtualName)
+
+        if (module) {
+          server.moduleGraph.invalidateModule(module)
+
+          console.log(module.id)
+
+          server.ws.send({
+            type: 'update',
+            updates: [
+              {
+                acceptedPath: module.id!,
+                path: module.id!,
+                timestamp: Date.now(),
+                type: 'js-update',
+              },
+            ],
+          })
+        }
+      }
+
       virtualCssFiles.set(virtualName, cssText)
 
-      result.code += `\nimport ${JSON.stringify(virtualName)};\n`
+      result.code += `\nimport "${virtualName}";\n`
 
       if (hash) {
         persistentCache.addFile(hash, id, {

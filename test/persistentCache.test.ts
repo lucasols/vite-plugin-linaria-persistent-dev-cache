@@ -3,6 +3,8 @@ import { createPersistentCache } from '../src/persistentCache'
 import { matchValuePattern, valuePatterns } from './utils/matchValuePattern'
 import { sleep } from './utils/testUtils'
 
+const version = 3
+
 const mockedFS = new Map<string, string>()
 
 function mockReadFile(path: string) {
@@ -53,7 +55,6 @@ function viteTransformFile(
     code: newCode,
     cssText: 'css',
     map: null,
-    cssSlug: 'slug',
   })
 
   return 'addedToCache'
@@ -70,19 +71,16 @@ test('adding cache files', async () => {
 
   persistentCache.addFile('hashfile1', 'file1', {
     code: 'const a = 1',
-    cssSlug: 'slug',
     cssText: 'css',
     map: null,
   })
   persistentCache.addFile('hashfile2', 'file2', {
     code: 'const a = 2',
-    cssSlug: 'slug',
     cssText: 'css',
     map: null,
   })
   persistentCache.addFile('hashfile3', 'file3', {
     code: 'const a = 3',
-    cssSlug: 'slug',
     cssText: 'css',
     map: null,
   })
@@ -93,7 +91,7 @@ test('adding cache files', async () => {
 
   expect(
     matchValuePattern(getCache(), {
-      version: 1,
+      version,
       rootDir: '',
       lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
       viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
@@ -150,7 +148,7 @@ describe('clean build cache over time', () => {
     mockedFS.set(
       '.linaria-cache/cache.json',
       JSON.stringify({
-        version: 1,
+        version,
         rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
@@ -204,7 +202,7 @@ describe('clean build cache over time', () => {
 
     expect(
       matchValuePattern(getCache(), {
-        version: 1,
+        version,
         rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
@@ -249,7 +247,7 @@ describe('clean build cache over time', () => {
     mockedFS.set(
       '.linaria-cache/cache.json',
       JSON.stringify({
-        version: 1,
+        version,
         rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
@@ -321,7 +319,7 @@ describe('clean build cache over time', () => {
 
     expect(
       matchValuePattern(getCache(), {
-        version: 1,
+        version: 3,
         rootDir: '',
         lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
         viteConfigHash:
@@ -359,11 +357,10 @@ describe('clean build cache over time', () => {
       mockedFS.set(
         '.linaria-cache/cache.json',
         JSON.stringify({
-          version: 1,
+          version: 3,
           rootDir: '',
           lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
-          viteConfigHash:
-            '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
+          viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
           results: {
             hashfile1: {
               code: 'const a = 1',
@@ -392,7 +389,7 @@ describe('clean build cache over time', () => {
 
       expect(
         matchValuePattern(getCache(), {
-          version: 1,
+          version: 3,
           rootDir: '',
           lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
           viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
@@ -422,7 +419,7 @@ describe('clean build cache over time', () => {
 
       expect(
         matchValuePattern(getCache(), {
-          version: 1,
+          version: 3,
           rootDir: '',
           lockFileHash: '43693d6a2989cc9610ddf229f7a503e92a393b5f',
           viteConfigHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766||',
@@ -443,7 +440,7 @@ describe('clean build cache over time', () => {
 
       expect(
         matchValuePattern(getCache(), {
-          version: 1,
+          version: 3,
           rootDir: '',
           lockFileHash: '6fee57c71ec34e564ab21fd17da6a1559eb23766',
           viteConfigHash: '43693d6a2989cc9610ddf229f7a503e92a393b5f||',
