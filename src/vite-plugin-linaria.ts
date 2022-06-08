@@ -4,6 +4,7 @@
  * returns transformed code without template literals and attaches generated source maps
  */
 import { EvalCache, Module, slugify, transform } from '@linaria/babel-preset'
+import fs from 'fs'
 import path from 'path'
 import { normalizePath, Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 import { createFileDepHash, FileDepHashInstance } from './fileDepHash'
@@ -54,24 +55,27 @@ export default function linaria({
 
   type StatsMode = 'create' | 'cached' | 'skiped'
 
-  const stats: Record<
-    `${StatsMode}Time` | `${StatsMode}Count` | 'total',
-    number
-  > = {
-    total: 0,
-    createTime: 0,
-    cachedTime: 0,
-    skipedTime: 0,
-    createCount: 0,
-    cachedCount: 0,
-    skipedCount: 0,
-  }
-
   let logStats:
     | ((startTime: number, mode: StatsMode, file: string) => void)
     | null = null
 
   if (debug) {
+    const stats: Record<
+      `${StatsMode}Time` | `${StatsMode}Count` | 'total',
+      number
+    > = {
+      total: 0,
+      createTime: 0,
+      cachedTime: 0,
+      skipedTime: 0,
+      createCount: 0,
+      cachedCount: 0,
+      skipedCount: 0,
+    }
+
+    const uncachedFiles: string[] = []
+    const skipedFiles: string[] = []
+
     let statsTimeout: any
     logStats = (startTime, mode, file: string) => {
       const delta = Date.now() - startTime
@@ -79,9 +83,22 @@ export default function linaria({
       stats[`${mode}Time`] += delta
       stats[`${mode}Count`]++
 
+      if (mode === 'create') {
+        uncachedFiles.push(file)
+      }
+
+      if (mode === 'skiped') {
+        skipedFiles.push(file)
+      }
+
       clearTimeout(statsTimeout)
       statsTimeout = setTimeout(() => {
         console.log(stats, file)
+
+        fs.writeFileSync(
+          'linaria-plugin-stats.json',
+          JSON.stringify(stats, null, 2),
+        )
       }, 2000)
     }
   }
