@@ -58,6 +58,7 @@ export default function linaria({
   let logStats:
     | ((startTime: number, mode: StatsMode, file: string) => void)
     | null = null
+  let hashingTime = 0
 
   if (debug) {
     const stats: Record<
@@ -93,11 +94,20 @@ export default function linaria({
 
       clearTimeout(statsTimeout)
       statsTimeout = setTimeout(() => {
-        console.info(stats, file)
+        const statsWithHashingTime = {
+          ...stats,
+          hashingTime,
+        }
+
+        console.info(statsWithHashingTime, file)
 
         fs.writeFileSync(
           'linaria-plugin-stats.json',
-          JSON.stringify({ stats, uncachedFiles, skipedFiles }, null, 2),
+          JSON.stringify(
+            { stats: statsWithHashingTime, uncachedFiles, skipedFiles },
+            null,
+            2,
+          ),
         )
       }, 2000)
     }
@@ -148,6 +158,10 @@ export default function linaria({
 
       if (enablePersistentCache) {
         hash = fileDepHash.getHash(id, code).hash
+
+        if (debug) {
+          hashingTime += Date.now() - startTime
+        }
 
         const cached = hash && persistentCache.getFile(hash)
 
