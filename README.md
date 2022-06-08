@@ -4,7 +4,7 @@ A vite plugin for linaria that uses persistent file cache in dev mode, which imp
 
 # Limitations
 
-Because of the performance improvements the plugin has some kwon limitations:
+Because of the performance improvements the plugin has some known limitations:
 - Files with relative imports can't be optimized
 
 Other limitations or Pending improvements:
