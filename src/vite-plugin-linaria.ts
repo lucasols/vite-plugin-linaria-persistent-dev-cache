@@ -43,19 +43,47 @@ export default function linaria({
     viteConfigFilePath: path.resolve(root, viteConfigFilePath),
     lockFilePath: lockFileAbsPath,
     rootDir: root,
-    debug,
+    debug: false,
   })
 
   let fileDepHash: FileDepHashInstance
 
-  function debugLog(...args: any[]) {
-    if (debug) {
-      console.log('[linaria]', ...args)
-    }
-  }
-
   function getVirtualName(id: string) {
     return `@linaria-css-cache/${slugify(id)}.css`
+  }
+
+  type StatsMode = 'create' | 'cached' | 'skiped'
+
+  const stats: Record<
+    `${StatsMode}Time` | `${StatsMode}Count` | 'total',
+    number
+  > = {
+    total: 0,
+    createTime: 0,
+    cachedTime: 0,
+    skipedTime: 0,
+    createCount: 0,
+    cachedCount: 0,
+    skipedCount: 0,
+  }
+
+  let logStats:
+    | ((startTime: number, mode: StatsMode, file: string) => void)
+    | null = null
+
+  if (debug) {
+    let statsTimeout: any
+    logStats = (startTime, mode, file: string) => {
+      const delta = Date.now() - startTime
+      stats.total += delta
+      stats[`${mode}Time`] += delta
+      stats[`${mode}Count`]++
+
+      clearTimeout(statsTimeout)
+      statsTimeout = setTimeout(() => {
+        console.log(stats, file)
+      }, 2000)
+    }
   }
 
   return {
@@ -94,6 +122,8 @@ export default function linaria({
         return
       }
 
+      const startTime = Date.now()
+
       const isDevMode = config.command === 'serve'
       const enablePersistentCache = isDevMode && !disableDevPersistentCache
 
@@ -102,14 +132,14 @@ export default function linaria({
       if (enablePersistentCache) {
         hash = fileDepHash.getHash(id, code).hash
 
-        const cached = persistentCache.getFile(hash)
+        const cached = hash && persistentCache.getFile(hash)
 
         if (cached) {
-          debugLog(`${path.relative(root, id)} cached`)
-
           const virtualName = getVirtualName(id)
 
           virtualCssFiles.set(virtualName, cached.cssText)
+
+          logStats?.(startTime, 'cached', id)
 
           return cached
         }
@@ -129,6 +159,8 @@ export default function linaria({
       Module._resolveFilename = originalResolver
 
       if (!result.cssText) {
+        logStats?.(startTime, 'skiped', id)
+
         return
       }
 
@@ -174,6 +206,8 @@ export default function linaria({
           map: result.sourceMap,
         })
       }
+
+      logStats?.(startTime, 'create', id)
 
       return { code: result.code, map: result.sourceMap }
     },
