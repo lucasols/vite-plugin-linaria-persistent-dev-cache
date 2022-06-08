@@ -16,7 +16,6 @@
     "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
     "keyofStringsOnly": true,
-    "noUnusedLocals": true,
     "strictPropertyInitialization": true
   }
 }
