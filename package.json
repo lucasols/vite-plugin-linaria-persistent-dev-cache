@@ -13,6 +13,7 @@
   "files": [
     "dist"
   ],
+  "repository": "github:lucaslos/vite-plugin-linaria-persistent-dev-cache",
   "author": "Lucas Santos",
   "main": "./dist/vite-plugin-linaria.js",
   "types": "./dist/vite-plugin-linaria.d.ts",
