@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "npm-publish",
+			"problemMatcher": [],
+			"label": "npm: npm-publish",
+			"detail": "pnpm run build && npm publish"
+		}
+	]
+}

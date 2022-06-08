@@ -112,7 +112,7 @@ export function createPersistentCache({
       lockFileHash !== persistentCache.lockFileHash ||
       viteConfigHash !== persistentCache.viteConfigHash
     ) {
-      debugLog('cache reseted')
+      console.log('[linaria] Dev cache reseted')
 
       persistentCache = {
         version: cacheFormatVersion,
