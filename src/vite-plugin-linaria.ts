@@ -127,7 +127,7 @@ export default function linaria({
       let { cssText } = result
 
       const slug = slugify(cssText)
-      const filename = getVirtualName(slug)
+      const filename = getVirtualName(slugify(id))
 
       if (sourceMap && result.cssSourceMapText) {
         const map = Buffer.from(result.cssSourceMapText).toString('base64')
