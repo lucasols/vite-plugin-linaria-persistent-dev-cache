@@ -93,11 +93,11 @@ export default function linaria({
 
       clearTimeout(statsTimeout)
       statsTimeout = setTimeout(() => {
-        console.log(stats, file)
+        console.info(stats, file)
 
         fs.writeFileSync(
           'linaria-plugin-stats.json',
-          JSON.stringify(stats, null, 2),
+          JSON.stringify({ stats, uncachedFiles, skipedFiles }, null, 2),
         )
       }, 2000)
     }
@@ -195,8 +195,6 @@ export default function linaria({
 
         if (module) {
           server.moduleGraph.invalidateModule(module)
-
-          console.log(module.id)
 
           server.ws.send({
             type: 'update',
