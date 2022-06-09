@@ -113,6 +113,10 @@ function getCodeFromResolvedPath(
           resolveRelativeFrom,
         )
 
+        if (!resolvedPath) {
+          console.error(`Could not resolve ${unresolved}`)
+        }
+
         if (resolvedPath) {
           return getCodeFromResolvedPath(
             resolvedPath,
@@ -143,7 +147,6 @@ type CacheEntry =
 
 type Debug = {
   cached: number
-  notCached: number
   addedToCache: number
   timing: number
   getAllCodeDepsCalls: number
@@ -175,6 +178,7 @@ function mergeEdgeDeps(
   edge: string,
   deps: Map<string, string>,
   config: InstanceProps,
+  visited: Map<string, string>,
 ) {
   const cacheEntry = config.codeDepsCache.get(edge)
 
@@ -186,6 +190,7 @@ function mergeEdgeDeps(
 
   for (const dep of edgeDeps) {
     deps.set(dep.fileId, dep.code)
+    visited.set(dep.fileId, dep.code)
   }
 }
 
@@ -195,6 +200,7 @@ function getAllCodeDeps(
   config: InstanceProps,
   debug: Debug,
   visited: Map<string, string> = new Map(),
+  extraDeps: Map<string, string> = new Map(),
   inPath: Set<string> = new Set(),
   deepth = 0,
 ): { deps: CodeDependency[]; hasCircularDep: boolean } {
@@ -202,13 +208,14 @@ function getAllCodeDeps(
 
   const cachedValue = config.codeDepsCache.get(fileId)
 
+  visited.set(fileId, code)
+
   if (cachedValue) {
     debug.cached++
 
     return { deps: cachedValue.deps, hasCircularDep: false }
   }
 
-  visited.set(fileId, code)
   inPath.add(fileId)
 
   const edges = getEdges(code, fileId, config)
@@ -236,6 +243,7 @@ function getAllCodeDeps(
         config,
         debug,
         visited,
+        extraDeps,
         inPath,
         deepth + 1,
       ).hasCircularDep
@@ -247,18 +255,20 @@ function getAllCodeDeps(
 
     if (edgeHasCircularDep) {
       hasCircularDep = true
+
       continue
     }
 
     deps.set(edge, edgeCode)
 
-    mergeEdgeDeps(edge, deps, config)
+    mergeEdgeDeps(edge, deps, config, visited)
   }
 
   inPath.delete(fileId)
 
   if (deepth === 0) {
     visited.delete(fileId)
+    extraDeps.delete(fileId)
   }
 
   const depsArray: CodeDependency[] = []
@@ -276,8 +286,9 @@ function getAllCodeDeps(
     }
     //
     else {
-      debug.notCached++
-      config.codeDepsCache.set(fileId, false)
+      if (!config.codeDepsCache.has(fileId)) {
+        config.codeDepsCache.set(fileId, false)
+      }
     }
   }
   //
@@ -298,8 +309,21 @@ function populateDepsArray(
   deps: Map<string, string>,
   depsArray: CodeDependency[],
   depsId: Set<string>,
+  extraDeps?: Map<string, string>,
 ) {
   for (const [depFileId, code] of deps) {
+    addDep(depFileId, code)
+  }
+
+  if (extraDeps) {
+    for (const [depFileId, code] of extraDeps) {
+      if (!deps.has(depFileId)) {
+        addDep(depFileId, code)
+      }
+    }
+  }
+
+  function addDep(depFileId: string, code: string) {
     depsArray.push({
       fileId: depFileId,
       code: code,
@@ -363,7 +387,8 @@ export type FileDepHashInstance = {
   getHash: (fileId: string, code: string) => CodeHashResult
   getCodeDepsCache: () => Map<string, CacheEntry>
   cleanCacheForFile: (fileId: string) => void
-  getUnoptimizedFiles: () => string[]
+  getStats: () => Debug & { unoptimizedFiles: string[] }
+  _resetDebug: () => void
 }
 
 export function createFileDepHash(
@@ -381,7 +406,6 @@ export function createFileDepHash(
 
   const debug: Debug = {
     cached: 0,
-    notCached: 0,
     addedToCache: 0,
     timing: 0,
     getAllCodeDepsCalls: 0,
@@ -413,12 +437,20 @@ export function createFileDepHash(
     return getCodeHash(fileId, code, instance, debug)
   }
 
+  function _resetDebug() {
+    debug.cached = 0
+    debug.addedToCache = 0
+    debug.timing = 0
+    debug.getAllCodeDepsCalls = 0
+  }
+
   return {
     resetCache,
     getHash,
     getCodeDepsCache,
     cleanCacheForFile,
-    getUnoptimizedFiles: getStats,
+    getStats,
+    _resetDebug,
   }
 }
 

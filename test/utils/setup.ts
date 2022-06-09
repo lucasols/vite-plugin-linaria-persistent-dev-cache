@@ -11,10 +11,11 @@ const defaultAliases = [
 export function createFileDeepHashInstance(
   rootDir: string,
   exclude: RegExp[] = [],
+  aliases = defaultAliases,
 ) {
   return createFileDepHash({
     rootDir: rootDir,
-    aliases: defaultAliases,
+    aliases,
     include: defaultInclude,
     exclude,
   })

@@ -109,7 +109,7 @@ export default function linaria({
             uncachedFiles,
             skipedFiles,
             uncachedFileHashs,
-            deepHashStats: fileDepHash.getUnoptimizedFiles(),
+            deepHashStats: fileDepHash.getStats(),
           },
           null,
           2,

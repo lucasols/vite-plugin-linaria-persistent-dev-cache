@@ -36,19 +36,21 @@ describe('caches the deps of previous calls', () => {
     })
 
     test('Table second call', () => {
+      fileDepHash._resetDebug()
+
       const tableResult2 = getPrivateFileDepHash(
         './src/components/Table/Table.tsx',
       )
 
       expect(tableResult2.debug.cached).toEqual(1)
-      expect(tableResult2.debug.notCached).toEqual(0)
-
       expect(tableResult2.importsMap.length, 'num of deps').toEqual(726)
 
       console.log('second call', tableResult2.debug.timing)
     })
 
     test('Dropdown', () => {
+      fileDepHash._resetDebug()
+
       const result = getPrivateFileDepHash(
         './src/components/Dropdown/Dropdown.tsx',
       )
@@ -57,17 +59,17 @@ describe('caches the deps of previous calls', () => {
 
       expect(result.debug.getAllCodeDepsCalls).toEqual(1)
       expect(result.debug.cached).toEqual(1)
-      expect(result.debug.notCached).toEqual(0)
       expect(result.debug.addedToCache).toEqual(0)
     })
 
     test('MoreMenu', () => {
+      fileDepHash._resetDebug()
+
       const result = getPrivateFileDepHash('./src/components/MoreMenu.tsx')
 
       expect(result.importsMap.length).toEqual(29)
 
       expect(result.debug.cached).toEqual(1)
-      expect(result.debug.notCached).toEqual(0)
     })
   })
 
@@ -94,6 +96,8 @@ describe('caches the deps of previous calls', () => {
 })
 
 test('MoreMenu then DropDown', () => {
+  fileDepHash._resetDebug()
+
   fileDepHash.resetCache()
 
   const moreMenuResult = getPrivateFileDepHash('./src/components/MoreMenu.tsx')
@@ -107,5 +111,4 @@ test('MoreMenu then DropDown', () => {
 
   expect(dropdownResult.importsMap.length).toEqual(6)
   expect(dropdownResult.debug.cached).toEqual(1)
-  expect(dropdownResult.debug.notCached).toEqual(0)
 })

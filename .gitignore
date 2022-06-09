@@ -1,4 +1,5 @@
 test/__mocks__/private
+test/__mocks__/private2
 node_modules
 table.cpuprofile
 dist

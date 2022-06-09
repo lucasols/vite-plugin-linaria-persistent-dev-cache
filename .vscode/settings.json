@@ -1,3 +1,4 @@
 {
-  "editor.foldingImportsByDefault": false
+  "editor.foldingImportsByDefault": false,
+  "testing.automaticallyOpenPeekView": "never"
 }

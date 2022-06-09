@@ -23,6 +23,7 @@ function getPublicFileDepHash(file: string) {
 
 beforeEach(() => {
   fileDepHash.resetCache()
+  fileDepHash._resetDebug()
 })
 
 describe('public tests', () => {
