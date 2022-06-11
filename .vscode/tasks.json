@@ -7,6 +7,13 @@
 			"problemMatcher": [],
 			"label": "npm: npm-publish",
 			"detail": "pnpm run build && npm publish"
+		},
+		{
+			"type": "npm",
+			"script": "test:ui",
+			"problemMatcher": [],
+			"label": "npm: test:ui",
+			"detail": "vitest --ui"
 		}
 	]
 }

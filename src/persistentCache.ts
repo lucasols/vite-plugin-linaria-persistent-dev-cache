@@ -67,7 +67,7 @@ export function createPersistentCache({
   cacheFilePath,
   _readFile = defaultReadFile,
   _writeFile = defaultWriteFile,
-  _writeDebounce = 3000,
+  _writeDebounce = 5_000,
   lockFilePath,
   rootDir,
   debug,
@@ -202,7 +202,13 @@ export function createPersistentCache({
     updateTimeout = setTimeout(() => {
       deleteOldFiles()
 
-      _writeFile(cacheFilePath, JSON.stringify(persistentCache))
+      const content = JSON.stringify(persistentCache)
+
+      _writeFile(cacheFilePath, content)
+
+      if (debug) {
+        debugLog('write new cache version, length', content.length)
+      }
     }, _writeDebounce)
   }
 
@@ -226,6 +232,7 @@ export function createPersistentCache({
     const previousFileHash = persistentCache.fileHashes[fileIdCompressed]
 
     if (previousFileHash) {
+      debugLog('delete previous', fileIdCompressed)
       delete persistentCache.results[previousFileHash]
     }
 

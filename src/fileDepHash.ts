@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import { sortBy } from './utils'
 import { generateStringHash } from './utils'
 
 type Aliases = {
@@ -367,9 +368,11 @@ function getCodeHash(
 
   const codeHash = generateStringHash(code)
 
+  const sortedImports = sortBy(importsMap.deps, (item) => item.fileId)
+
   let importsHash = ''
 
-  for (const { code, fileId } of importsMap.deps) {
+  for (const { code, fileId } of sortedImports) {
     importsHash += generateStringHash(`${fileId}||${code}`)
   }
 

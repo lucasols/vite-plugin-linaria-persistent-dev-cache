@@ -44,7 +44,7 @@ export default function linaria({
     viteConfigFilePath: path.resolve(root, viteConfigFilePath),
     lockFilePath: lockFileAbsPath,
     rootDir: root,
-    debug: false,
+    debug,
   })
 
   let fileDepHash: FileDepHashInstance
@@ -80,6 +80,8 @@ export default function linaria({
     file: string,
     hash: string | false,
   ) {
+    if (!debug) return
+
     const delta = Date.now() - startTime
     debugStats.total += delta
     debugStats[`${mode}Time`] += delta
@@ -116,9 +118,6 @@ export default function linaria({
         ),
       )
     }, 2000)
-  }
-
-  if (debug) {
   }
 
   return {
