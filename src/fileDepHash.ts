@@ -34,6 +34,10 @@ function getImportsFromCode(
   const imports: string[] = []
 
   for (const [_, path] of allPossibleImports) {
+    if (path!.endsWith('.json')) {
+      continue
+    }
+
     if (!include.some((pattern) => pattern.test(path!))) {
       continue
     }
@@ -86,7 +90,7 @@ function getResolvedPath(
   for (const suffix of testSuffix) {
     const testURL = `${normalizedPath}${suffix}`
 
-    if (fs.statSync(testURL, { throwIfNoEntry: false })) {
+    if (fs.statSync(testURL, { throwIfNoEntry: false })?.isFile()) {
       return testURL
     }
   }

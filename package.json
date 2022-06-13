@@ -8,6 +8,7 @@
     "test:run": "vitest run",
     "bench-file-dep-hash": "tsm ./test/benchs.ts",
     "build": "vitest run && tsc -p tsconfig.prod.json",
+    "build-no-test": "tsc -p tsconfig.prod.json",
     "npm-publish": "pnpm run build && npm publish"
   },
   "files": [
