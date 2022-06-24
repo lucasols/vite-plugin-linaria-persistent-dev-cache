@@ -41,32 +41,32 @@ test('resolve relative imports', () => {
   expect(getSimplifiedSortedImports(result.importsMap, relativeRoot))
     .toMatchInlineSnapshot(`
     [
-      "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
-      "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
+      "/test/__mocks__/public/src/relative/scripts/script1.ts",
+      "/test/__mocks__/public/src/relative/scripts/script2.ts",
     ]
   `)
   expect(result.hash).toMatchInlineSnapshot(
-    '"cb412c8ef8911ca8b9ec69794418dec56cd296dd||f3bf3a1375175076ebf01cfe363dfb2b31ed2a43"',
+    '"f6a69a95987b9bb6d7f90625a3af5e834f1ea5bb||a2a68412a295d8f951046207089beaf84860dcdf"',
   )
 
   expect(getSortedCodeDepsCache(root, fileDepHash, relativeRoot)).toMatchInlineSnapshot(`
     [
       {
+        "fileId": "/scripts/script1.ts",
+        "imports": [
+          "/test/__mocks__/public/src/relative/scripts/script2.ts",
+        ],
+      },
+      {
+        "fileId": "/scripts/script2.ts",
+        "imports": [],
+      },
+      {
         "fileId": "/vite.config.ts",
         "imports": [
-          "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
-          "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
+          "/test/__mocks__/public/src/relative/scripts/script1.ts",
+          "/test/__mocks__/public/src/relative/scripts/script2.ts",
         ],
-      },
-      {
-        "fileId": "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script1.ts",
-        "imports": [
-          "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
-        ],
-      },
-      {
-        "fileId": "\\\\test\\\\__mocks__\\\\public\\\\src\\\\relative\\\\scripts\\\\script2.ts",
-        "imports": [],
       },
     ]
   `)

@@ -34,6 +34,7 @@ type Options = {
   _readFile?: (path: string) => string | null
   _writeFile?: (path: string, data: string) => void
   _writeDebounce?: number
+  _firstWriteDebounce?: number
   _getNow?: () => number
 }
 
@@ -67,13 +68,16 @@ export function createPersistentCache({
   cacheFilePath,
   _readFile = defaultReadFile,
   _writeFile = defaultWriteFile,
-  _writeDebounce = 10_000,
+  _writeDebounce = 1_000 * 60 * 5,
+  _firstWriteDebounce = 1_000 * 10,
   lockFilePath,
   rootDir,
   debug,
   viteConfigFilePath,
   _getNow = Date.now,
 }: Options) {
+  let debounce = _firstWriteDebounce
+
   const cacheFileJSON = _readFile(cacheFilePath)
 
   let updateTimeout: NodeJS.Timeout | null = null
@@ -200,6 +204,8 @@ export function createPersistentCache({
     }
 
     updateTimeout = setTimeout(() => {
+      debounce = _writeDebounce
+
       deleteOldFiles()
 
       const content = JSON.stringify(persistentCache)
@@ -209,7 +215,7 @@ export function createPersistentCache({
       if (debug) {
         debugLog('write new cache version, length', content.length)
       }
-    }, _writeDebounce)
+    }, debounce)
   }
 
   function compressFileId(fileId: string) {

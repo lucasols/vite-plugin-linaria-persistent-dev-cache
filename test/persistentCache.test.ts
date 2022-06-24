@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { createPersistentCache } from '../src/persistentCache'
 import { matchValuePattern, valuePatterns } from './utils/matchValuePattern'
 import { sleep } from './utils/testUtils'
@@ -26,7 +26,8 @@ const defaultConfig = {
   lockFilePath: './pnpm-lock',
   _readFile: mockReadFile,
   _writeFile: mockWriteFile,
-  _writeDebounce: 10,
+  _firstWriteDebounce: 10,
+  _writeDebounce: 30,
   rootDir: '',
   _getNow: () => new Date('2022-05-16').getTime(),
 }
@@ -431,4 +432,44 @@ describe('clean build cache over time', () => {
       ).toBe(true)
     })
   })
+})
+
+test('write debounce', async () => {
+  const writeFile = vi.fn(mockWriteFile)
+
+  addDefaultFiles()
+  const persistentCache = createPersistentCache({
+    ...defaultConfig,
+    _writeFile: writeFile,
+  })
+
+  persistentCache.addFile('hashfile1', 'file1', {
+    code: 'const a = 1',
+    cssText: 'css',
+    map: null,
+  })
+
+  expect(getCache()).toMatchInlineSnapshot('null')
+
+  await sleep(12)
+
+  const cache1 = mockReadFile('.linaria-cache/cache.json')
+
+  expect(getCache()).toBeTruthy()
+
+  persistentCache.addFile('hashfile1', 'file1', {
+    code: 'const a = 1',
+    cssText: 'css',
+    map: null,
+  })
+
+  await sleep(12)
+
+  expect(cache1).toBe(mockReadFile('.linaria-cache/cache.json'))
+
+  await sleep(35)
+
+  expect(cache1).not.toBe(mockReadFile('.linaria-cache/cache.json'))
+
+  expect(writeFile).toHaveBeenCalledTimes(2)
 })
