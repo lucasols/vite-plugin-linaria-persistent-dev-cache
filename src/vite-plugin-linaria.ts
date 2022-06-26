@@ -14,6 +14,7 @@ type RollupPluginOptions = {
   sourceMap?: boolean
   persistentCachePath?: string
   disableDevPersistentCache?: boolean
+  cacheReadOnly?: boolean
   include: RegExp[]
   exclude?: RegExp[]
   lockFilePath: string
@@ -26,6 +27,7 @@ export default function linaria({
   persistentCachePath = './node_modules/.linaria-cache/cache.json',
   disableDevPersistentCache,
   include,
+  cacheReadOnly,
   exclude = [],
   viteConfigFilePath = './vite.config.ts',
   lockFilePath,
@@ -39,13 +41,7 @@ export default function linaria({
 
   const lockFileAbsPath = normalizePath(path.resolve(root, lockFilePath))
 
-  const persistentCache = createPersistentCache({
-    cacheFilePath: persistentCachePath,
-    viteConfigFilePath: path.resolve(root, viteConfigFilePath),
-    lockFilePath: lockFileAbsPath,
-    rootDir: root,
-    debug,
-  })
+  let persistentCache: ReturnType<typeof createPersistentCache> | null = null
 
   let fileDepHash: FileDepHashInstance
 
@@ -131,6 +127,16 @@ export default function linaria({
         include,
         exclude,
       })
+
+      if (config.command === 'serve' && !disableDevPersistentCache) {
+        persistentCache = createPersistentCache({
+          cacheFilePath: persistentCachePath,
+          viteConfigFilePath: path.resolve(root, viteConfigFilePath),
+          lockFilePath: lockFileAbsPath,
+          rootDir: root,
+          debug,
+        })
+      }
     },
     configureServer(_server) {
       server = _server
@@ -159,11 +165,10 @@ export default function linaria({
       const startTime = Date.now()
 
       const isDevMode = config.command === 'serve'
-      const enablePersistentCache = isDevMode && !disableDevPersistentCache
 
       let hash: string | false = false
 
-      if (enablePersistentCache) {
+      if (persistentCache) {
         hash = fileDepHash.getHash(id, code).hash
 
         if (debug) {
@@ -235,8 +240,8 @@ export default function linaria({
 
       result.code += `\nimport "${virtualName}";\n`
 
-      if (hash) {
-        persistentCache.addFile(hash, id, {
+      if (hash && !cacheReadOnly) {
+        persistentCache?.addFile(hash, id, {
           code: result.code,
           cssText,
           map: result.sourceMap,
@@ -253,11 +258,11 @@ export default function linaria({
       EvalCache.clearForFile(file)
 
       if (file === lockFileAbsPath) {
-        persistentCache.checkConfigFiles()
+        persistentCache?.checkConfigFiles()
       }
     },
     buildStart() {
-      persistentCache.checkConfigFiles()
+      persistentCache?.checkConfigFiles()
     },
   }
 }
