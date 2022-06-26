@@ -83,9 +83,7 @@ function getResolvedPath(
   } else {
     for (const { find, replacement } of aliases) {
       if (typeof find !== 'string') {
-        throw new Error(
-          'alias find Regex is not supported by vite-plugin-linaria-dev-cache',
-        )
+        continue
       }
 
       if (normalizedPath.startsWith(find)) {
@@ -230,9 +228,7 @@ function getImportPathFromFileId(
 
   for (const alias of config.aliases) {
     if (typeof alias.find !== 'string') {
-      throw new Error(
-        'alias find Regex is not supported by vite-plugin-linaria-dev-cache',
-      )
+      continue
     }
 
     if (relativePath.startsWith(alias.replacement)) {
