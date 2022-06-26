@@ -24,29 +24,44 @@ interface InstanceProps extends FileDepHashConfig {
 function getImportsFromCode(
   code: string,
   { include, exclude }: InstanceProps,
+  inPathImportPaths: Set<string>,
 ): string[] {
   const codeWithoutComments = code.replace(/\/\/.*|\/\*[^]*?\*\//g, '')
 
-  const regex = /from\s+['"]([^'"]+)['"]/g
+  const regex =
+    /import (?!type {|{(?: type \w+,*)+ }|{\n(?: *type *\w+,*\n)+})[\s\S]+?from\s+['"]([^'"]+)['"]/g
 
   const allPossibleImports = codeWithoutComments.matchAll(regex)
 
   const imports: string[] = []
 
-  for (const [_, path] of allPossibleImports) {
-    if (path!.endsWith('.json')) {
+  let isInAIncludedBranch = inPathImportPaths.size >= 2
+
+  if (!isInAIncludedBranch) {
+    const firstImport = [...inPathImportPaths.values()][0]
+
+    if (firstImport) {
+      isInAIncludedBranch = include.some((regex) => regex.test(firstImport))
+    }
+  }
+
+  for (const [_, importPath] of allPossibleImports) {
+    if (importPath!.endsWith('.json')) {
       continue
     }
 
-    if (!include.some((pattern) => pattern.test(path!))) {
+    const includeFile =
+      isInAIncludedBranch || include.some((regex) => regex.test(importPath!))
+
+    if (!includeFile) {
       continue
     }
 
-    if (exclude.some((regex) => regex.test(path!))) {
+    if (exclude.some((regex) => regex.test(importPath!))) {
       continue
     }
 
-    imports.push(path!)
+    imports.push(importPath!)
   }
 
   return imports
@@ -67,11 +82,13 @@ function getResolvedPath(
     normalizedPath = path.resolve(path.dirname(resolveRelativeFrom), filePath)
   } else {
     for (const { find, replacement } of aliases) {
-      if (
-        typeof find === 'string'
-          ? normalizedPath.startsWith(find)
-          : find.test(normalizedPath)
-      ) {
+      if (typeof find !== 'string') {
+        throw new Error(
+          'alias find Regex is not supported by vite-plugin-linaria-dev-cache',
+        )
+      }
+
+      if (normalizedPath.startsWith(find)) {
         normalizedPath = normalizedPath.replace(find, replacement)
       }
     }
@@ -157,23 +174,29 @@ type Debug = {
   getAllCodeDepsCalls: number
 }
 
+type Edge = {
+  fileId: string
+  importPath: string
+}
+
 function getEdges(
   code: string,
   parentFileId: string,
   config: InstanceProps,
-): string[] {
-  const imports = getImportsFromCode(code, config)
+  inPathImportPaths: Set<string>,
+): Edge[] {
+  const imports = getImportsFromCode(code, config, inPathImportPaths)
 
-  const edges: string[] = []
+  const edges: Edge[] = []
 
   for (const importPath of imports) {
-    const resolvedFiledId = getResolvedPath(importPath, config, parentFileId)
+    const fileId = getResolvedPath(importPath, config, parentFileId)
 
-    if (!resolvedFiledId) {
+    if (!fileId) {
       continue
     }
 
-    edges.push(resolvedFiledId)
+    edges.push({ fileId, importPath })
   }
 
   return edges
@@ -199,14 +222,36 @@ function mergeEdgeDeps(
   }
 }
 
+function getImportPathFromFileId(
+  fileId: string,
+  config: InstanceProps,
+): string | false {
+  const relativePath = fileId.replace(config.rootDir, '/')
+
+  for (const alias of config.aliases) {
+    if (typeof alias.find !== 'string') {
+      throw new Error(
+        'alias find Regex is not supported by vite-plugin-linaria-dev-cache',
+      )
+    }
+
+    if (relativePath.startsWith(alias.replacement)) {
+      return relativePath.replace(alias.replacement, alias.find)
+    }
+  }
+
+  return false
+}
+
 function getAllCodeDeps(
   fileId: string,
   code: string,
   config: InstanceProps,
   debug: Debug,
   visited: Map<string, string> = new Map(),
-  extraDeps: Map<string, string> = new Map(),
   inPath: Set<string> = new Set(),
+  inPathImportPaths: Set<string> = new Set(),
+  _importPath: string | null = null,
   deepth = 0,
 ): { deps: CodeDependency[]; hasCircularDep: boolean } {
   debug.getAllCodeDepsCalls++
@@ -221,15 +266,18 @@ function getAllCodeDeps(
     return { deps: cachedValue.deps, hasCircularDep: false }
   }
 
-  inPath.add(fileId)
+  let importPath = _importPath || getImportPathFromFileId(fileId, config)
 
-  const edges = getEdges(code, fileId, config)
+  inPath.add(fileId)
+  if (importPath) inPathImportPaths.add(importPath)
+
+  const edges = getEdges(code, fileId, config, inPathImportPaths)
 
   const deps = new Map<string, string>()
 
   let hasCircularDep = false
 
-  for (const edge of edges) {
+  for (const { fileId: edge, importPath } of edges) {
     if (inPath.has(edge)) {
       hasCircularDep = true
       continue
@@ -248,8 +296,9 @@ function getAllCodeDeps(
         config,
         debug,
         visited,
-        extraDeps,
         inPath,
+        inPathImportPaths,
+        importPath,
         deepth + 1,
       ).hasCircularDep
     } else {
@@ -270,10 +319,10 @@ function getAllCodeDeps(
   }
 
   inPath.delete(fileId)
+  if (importPath) inPathImportPaths.delete(importPath)
 
   if (deepth === 0) {
     visited.delete(fileId)
-    extraDeps.delete(fileId)
   }
 
   const depsArray: CodeDependency[] = []

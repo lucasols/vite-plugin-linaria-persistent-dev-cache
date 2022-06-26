@@ -12,11 +12,12 @@ export function createFileDeepHashInstance(
   rootDir: string,
   exclude: RegExp[] = [],
   aliases = defaultAliases,
+  include: RegExp[] = defaultInclude,
 ) {
   return createFileDepHash({
     rootDir: rootDir,
     aliases,
-    include: defaultInclude,
+    include,
     exclude,
   })
 }

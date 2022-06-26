@@ -10,15 +10,18 @@ export function getImports(file: string) {
   const code = fs.readFileSync(fileId, 'utf-8')
   const include = [/^@src\//, /^@utils\//]
 
-  const result = testOnly.getImportsFromCode(code, {
-    include,
-    exclude: [],
-    aliases: [],
-    rootDir: '.',
-    resolveCache: new Map(),
-    codeDepsCache: new Map(),
-    changedAfterInitialBuild: new Set(),
-  })
+  const result = testOnly.getImportsFromCode(
+    code,
+    {
+      include,
+      exclude: [],
+      aliases: [],
+      rootDir: '.',
+      resolveCache: new Map(),
+      codeDepsCache: new Map(),
+    },
+    new Set(),
+  )
 
   return result
 }
@@ -97,5 +100,27 @@ describe('different line end types', () => {
     const mixedImports = getImports('./with-semi-and-no-semi.ts')
 
     expect(mixedImports).toStrictEqual(semiImports)
+  })
+
+  test('ignore types', () => {
+    const imports = getImports('./ignore-type-imports.ts')
+
+    expect(imports).toMatchInlineSnapshot(`
+      [
+        "@utils/checkIf",
+        "@utils/hooks/useDragAndDrop",
+        "@utils/hooks/useInfiniteLoading",
+        "@utils/i18n/i18n",
+        "@utils/typings",
+        "@src/components/ButtonElement",
+        "@src/components/PullToRefresh",
+        "@src/components/Table/EditCell",
+        "@src/components/Table/HeaderCell2",
+        "@src/components/Table/HeaderCell4",
+        "@src/objectFieldsCollection",
+        "@src/objectFieldsCollection2",
+        "@src/objectFieldsCollection3",
+      ]
+    `)
   })
 })

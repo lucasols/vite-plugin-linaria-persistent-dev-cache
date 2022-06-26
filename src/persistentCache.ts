@@ -68,7 +68,7 @@ export function createPersistentCache({
   cacheFilePath,
   _readFile = defaultReadFile,
   _writeFile = defaultWriteFile,
-  _writeDebounce = 1_000 * 60 * 5,
+  _writeDebounce = 1_000 * 60 * 4,
   _firstWriteDebounce = 1_000 * 10,
   lockFilePath,
   rootDir,
