@@ -14,7 +14,7 @@ type RollupPluginOptions = {
   sourceMap?: boolean
   persistentCachePath?: string
   disableDevPersistentCache?: boolean
-  cacheReadOnly?: boolean
+  cacheReadonly?: boolean
   include: RegExp[]
   exclude?: RegExp[]
   lockFilePath: string
@@ -27,7 +27,7 @@ export default function linaria({
   persistentCachePath = './node_modules/.linaria-cache/cache.json',
   disableDevPersistentCache,
   include,
-  cacheReadOnly,
+  cacheReadonly,
   exclude = [],
   viteConfigFilePath = './vite.config.ts',
   lockFilePath,
@@ -135,6 +135,7 @@ export default function linaria({
           lockFilePath: lockFileAbsPath,
           rootDir: root,
           debug,
+          readonly: cacheReadonly,
         })
       }
     },
@@ -240,7 +241,7 @@ export default function linaria({
 
       result.code += `\nimport "${virtualName}";\n`
 
-      if (hash && !cacheReadOnly) {
+      if (hash) {
         persistentCache?.addFile(hash, id, {
           code: result.code,
           cssText,

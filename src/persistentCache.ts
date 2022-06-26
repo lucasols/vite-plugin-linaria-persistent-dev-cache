@@ -30,6 +30,7 @@ type Options = {
   viteConfigFilePath: string
   lockFilePath: string
   rootDir: string
+  readonly: boolean | undefined
   debug?: boolean
   _readFile?: (path: string) => string | null
   _writeFile?: (path: string, data: string) => void
@@ -73,6 +74,7 @@ export function createPersistentCache({
   lockFilePath,
   rootDir,
   debug,
+  readonly,
   viteConfigFilePath,
   _getNow = Date.now,
 }: Options) {
@@ -199,6 +201,8 @@ export function createPersistentCache({
   }
 
   function updateCache() {
+    if (readonly) return
+
     if (updateTimeout) {
       clearTimeout(updateTimeout)
     }
@@ -227,6 +231,8 @@ export function createPersistentCache({
   }
 
   function addFile(hash: string, fileId: string, result: FileEntry) {
+    if (readonly) return
+
     const fileIdCompressed = compressFileId(fileId)
 
     persistentCache.results[hash] = {
