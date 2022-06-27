@@ -3,10 +3,7 @@ import path from 'path'
 import { sortBy } from './utils'
 import { generateStringHash } from './utils'
 
-type Aliases = {
-  find: string | RegExp
-  replacement: string
-}[]
+type Aliases = [find: string, replacement: string][]
 
 interface FileDepHashConfig {
   include: RegExp[]
@@ -81,11 +78,7 @@ function getResolvedPath(
   if (resolveRelative) {
     normalizedPath = path.resolve(path.dirname(resolveRelativeFrom), filePath)
   } else {
-    for (const { find, replacement } of aliases) {
-      if (typeof find !== 'string') {
-        continue
-      }
-
+    for (const [find, replacement] of aliases) {
       if (normalizedPath.startsWith(find)) {
         normalizedPath = normalizedPath.replace(find, replacement)
       }
@@ -226,13 +219,13 @@ function getImportPathFromFileId(
 ): string | false {
   const relativePath = fileId.replace(config.rootDir, '/')
 
-  for (const alias of config.aliases) {
-    if (typeof alias.find !== 'string') {
+  for (const [find, replacement] of config.aliases) {
+    if (typeof find !== 'string') {
       continue
     }
 
-    if (relativePath.startsWith(alias.replacement)) {
-      return relativePath.replace(alias.replacement, alias.find)
+    if (relativePath.startsWith(replacement)) {
+      return relativePath.replace(replacement, find)
     }
   }
 

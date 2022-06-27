@@ -45,6 +45,8 @@ export default function linaria({
 
   let fileDepHash: FileDepHashInstance
 
+  let resolvedAliases: [string, string][] = []
+
   function getVirtualName(id: string) {
     return `@linaria-css-cache/${slugify(id)}.css`
   }
@@ -121,9 +123,22 @@ export default function linaria({
     configResolved(resolvedConfig) {
       config = resolvedConfig
 
+      const configAlias = config.resolve.alias
+
+      if (Array.isArray(configAlias)) {
+        throw new Error('vite config `resolve.alias` arrays are not supported')
+      }
+
+      const aliasesArray: false | [string, string][] =
+        configAlias && Object.entries(configAlias)
+
+      if (aliasesArray) {
+        resolvedAliases = aliasesArray
+      }
+
       fileDepHash = createFileDepHash({
         rootDir: root,
-        aliases: config.resolve.alias,
+        aliases: resolvedAliases,
         include,
         exclude,
       })
@@ -191,7 +206,11 @@ export default function linaria({
 
       const originalResolver = Module._resolveFilename
 
-      Module._resolveFilename = aliasResolver(config, originalResolver, root)
+      Module._resolveFilename = aliasResolver(
+        resolvedAliases,
+        originalResolver,
+        root,
+      )
 
       const result = transform(code, {
         filename: id,
@@ -274,16 +293,15 @@ type ResolveFilename = (
 ) => string
 
 function aliasResolver(
-  config: ResolvedConfig,
+  aliases: [string, string][],
   originalResolveFilename: ResolveFilename,
   root: string,
 ): ResolveFilename {
   return (id, options) => {
     let aliasedPath: string | undefined = undefined
 
-    for (const { find, replacement } of config.resolve.alias) {
-      const matches =
-        typeof find === 'string' ? id.startsWith(find) : find.test(id)
+    for (const [find, replacement] of aliases) {
+      const matches = id.startsWith(find)
 
       if (matches) {
         aliasedPath = id.replace(find, replacement)
