@@ -6,7 +6,13 @@
 import { EvalCache, Module, slugify, transform } from '@linaria/babel-preset'
 import fs from 'fs'
 import path from 'path'
-import { normalizePath, Plugin, ResolvedConfig, ViteDevServer } from 'vite'
+import {
+  Alias,
+  normalizePath,
+  Plugin,
+  ResolvedConfig,
+  ViteDevServer,
+} from 'vite'
 import { createFileDepHash, FileDepHashInstance } from './fileDepHash'
 import { createPersistentCache } from './persistentCache'
 
@@ -45,7 +51,7 @@ export default function linaria({
 
   let fileDepHash: FileDepHashInstance
 
-  let resolvedAliases: [string, string][] = []
+  let resolvedAliases: Alias[] = []
 
   function getVirtualName(id: string) {
     return `@linaria-css-cache/${slugify(id)}.css`
@@ -123,18 +129,7 @@ export default function linaria({
     configResolved(resolvedConfig) {
       config = resolvedConfig
 
-      const configAlias = config.resolve.alias
-
-      if (Array.isArray(configAlias)) {
-        throw new Error('vite config `resolve.alias` arrays are not supported')
-      }
-
-      const aliasesArray: false | [string, string][] =
-        configAlias && Object.entries(configAlias)
-
-      if (aliasesArray) {
-        resolvedAliases = aliasesArray
-      }
+      resolvedAliases = config.resolve.alias
 
       fileDepHash = createFileDepHash({
         rootDir: root,
@@ -293,15 +288,16 @@ type ResolveFilename = (
 ) => string
 
 function aliasResolver(
-  aliases: [string, string][],
+  aliases: Alias[],
   originalResolveFilename: ResolveFilename,
   root: string,
 ): ResolveFilename {
   return (id, options) => {
     let aliasedPath: string | undefined = undefined
 
-    for (const [find, replacement] of aliases) {
-      const matches = id.startsWith(find)
+    for (const { find, replacement } of aliases) {
+      const matches =
+        typeof find === 'string' ? id.startsWith(find) : find.test(id)
 
       if (matches) {
         aliasedPath = id.replace(find, replacement)
