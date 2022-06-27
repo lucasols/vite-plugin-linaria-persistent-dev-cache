@@ -18,8 +18,8 @@ const fileDepHash = createFileDeepHashInstance(
     /^@src\/data\/componentTypes/,
   ],
   [
-    ['@src', '/src'],
-    ['@utils', '/utils-lib'],
+    { find: '@src', replacement: '/src' },
+    { find: '@utils', replacement: '/utils-lib' },
   ],
 )
 

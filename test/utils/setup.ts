@@ -3,9 +3,9 @@ import path from 'path'
 import { createFileDepHash, FileDepHashInstance } from '../../src/fileDepHash'
 
 const defaultInclude = [/^@src\//, /^@utils\//]
-const defaultAliases: [find: string, replacement: string][] = [
-  ['@src', '/src'],
-  ['@utils', '/utils'],
+const defaultAliases = [
+  { find: '@src', replacement: '/src' },
+  { find: '@utils', replacement: '/utils' },
 ]
 
 export function createFileDeepHashInstance(
