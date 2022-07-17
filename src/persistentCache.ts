@@ -86,9 +86,20 @@ export function createPersistentCache({
 
   let persistentCache: CacheFile
 
+  function debugLog(...args: any[]) {
+    if (debug) {
+      console.log('[linaria]', ...args)
+    }
+  }
+
+  let cacheGeneratedFromScratch = false
+
   if (cacheFileJSON) {
     persistentCache = JSON.parse(cacheFileJSON)
   } else {
+    console.log('Creating new dev cache file')
+    cacheGeneratedFromScratch = true
+
     persistentCache = {
       version: cacheFormatVersion,
       lockFileHash: getLockFileHash(),
@@ -99,13 +110,9 @@ export function createPersistentCache({
     }
   }
 
-  function debugLog(...args: any[]) {
-    if (debug) {
-      console.log('[linaria]', ...args)
-    }
-  }
-
   function checkConfigFiles() {
+    if (cacheGeneratedFromScratch) return
+
     const lockFileHash = getLockFileHash()
     const viteConfigHash = getViteConfigHash()
 

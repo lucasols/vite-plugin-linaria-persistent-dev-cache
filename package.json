@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-linaria-persistent-dev-cache",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "license": "MIT",
   "scripts": {
     "test": "vitest",
@@ -9,7 +9,7 @@
     "bench-file-dep-hash": "tsm ./test/benchs.ts",
     "build": "vitest run && tsc -p tsconfig.prod.json",
     "build-no-test": "tsc -p tsconfig.prod.json",
-    "npm-publish": "pnpm run build && npm publish"
+    "npm-publish": "./scripts/check-if-is-sync.sh && pnpm run build && npm publish"
   },
   "files": [
     "dist"
