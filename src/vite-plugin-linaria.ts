@@ -25,6 +25,7 @@ type RollupPluginOptions = {
   exclude?: RegExp[]
   lockFilePath: string
   viteConfigFilePath?: string
+  alias?: Alias[]
   debug?: boolean
 }
 
@@ -37,6 +38,7 @@ export default function linaria({
   exclude = [],
   viteConfigFilePath = './vite.config.ts',
   lockFilePath,
+  alias,
   debug,
 }: RollupPluginOptions): Plugin {
   const root = normalizePath(process.cwd())
@@ -129,7 +131,7 @@ export default function linaria({
     configResolved(resolvedConfig) {
       config = resolvedConfig
 
-      resolvedAliases = config.resolve.alias
+      resolvedAliases = alias || config.resolve.alias
 
       fileDepHash = createFileDepHash({
         rootDir: root,
