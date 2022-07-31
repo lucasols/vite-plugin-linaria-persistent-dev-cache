@@ -1,17 +1,43 @@
-import { test, expect } from '@playwright/test';
+import { expect, test, Page } from '@playwright/test'
+import { spawn } from 'child_process'
+import { startVite } from '../utils/startVite'
 
-test('hot reaload works', async ({ page }) => {
-  // TODO: setup
-  // TODO: clear test folder
-  // TODO: copy code to test folder
-  // TODO: start dev server
+test.describe.configure({ mode: 'serial' })
 
-  // TODO: test
-  // TODO: check that the page loads
-  // TODO: change code
-  // TODO: check if change is reflected in the page
+let page: Page
+let vite: Awaited<ReturnType<typeof startVite>>
 
-  // TODO: test bug
-  // TODO: reload page
-  // TODO: check if page have the same style as changed code
-});
+test.beforeAll(async ({ browser }) => {
+  page = await browser.newPage()
+
+  vite = await startVite('hot-reload-works')
+
+  await page.goto(`http://localhost:${vite.port}`)
+})
+
+test('hot reaload works', async () => {
+  const title = page.locator('data-testid=title')
+  title.waitFor()
+
+  await expect(title).toHaveCSS('color', 'rgb(255, 255, 0)')
+
+  vite.updateFileLine('App.tsx', 7, 'color: red')
+
+  await page.waitForTimeout(200)
+
+  await expect(title).toHaveCSS('color', 'rgb(255, 0, 0)')
+
+  vite.updateFileLine('App.tsx', 7, 'color: green')
+
+  await page.waitForTimeout(200)
+
+  await expect(title).toHaveCSS('color', 'rgb(0, 128, 0)')
+})
+
+test('style is keeped after reload', async () => {
+  page.reload()
+
+  const title = page.locator('data-testid=title')
+
+  await expect(title).toHaveCSS('color', 'rgb(0, 128, 0)')
+})

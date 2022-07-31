@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "moduleResolution": "node",
-    "module": "CommonJS",
+    "module": "ES2022",
     "jsx": "preserve",
     "skipLibCheck": true,
     "noEmit": true,
@@ -13,6 +13,7 @@
     "noImplicitAny": true,
     "alwaysStrict": true,
     "strict": true,
+    "allowJs": true,
     "noUncheckedIndexedAccess": true,
     "forceConsistentCasingInFileNames": true,
     "keyofStringsOnly": true,

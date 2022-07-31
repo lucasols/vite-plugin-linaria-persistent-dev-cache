@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "noEmit": false,
+    "module": "CommonJS",
     "declaration": true
   },
   "include": ["src/vite-plugin-linaria.ts"]

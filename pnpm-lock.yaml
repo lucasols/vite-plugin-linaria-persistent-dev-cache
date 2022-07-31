@@ -1,5 +1,14 @@
 lockfileVersion: 5.4
 
+overrides:
+  '@linaria/core': 3.0.0-beta.18
+  '@linaria/react': 3.0.0-beta.18
+  '@linaria/shaker': 3.0.0-beta.18
+  '@linaria/babel-preset': 3.0.0-beta.18
+  '@linaria/preeval': 3.0.0-beta.18
+  '@linaria/utils': 3.0.0-beta.18
+  '@linaria/logger': 3.0.0-beta.15
+
 importers:
 
   .:
@@ -10,7 +19,7 @@ importers:
       tsm: ^2.2.2
       typescript: ^4.7.4
       v8-profiler-next: ^1.9.0
-      vite: ^2.9.7
+      vite: ^2.9.14
       vitest: 0.19.1
     devDependencies:
       '@types/node': 18.6.3
@@ -19,7 +28,7 @@ importers:
       tsm: 2.2.2
       typescript: 4.7.4
       v8-profiler-next: 1.9.0
-      vite: 2.9.7
+      vite: 2.9.14
       vitest: 0.19.1_@vitest+ui@0.19.1
 
   app-test:
@@ -31,7 +40,7 @@ importers:
       '@linaria/react': 3.0.0-beta.18
       '@linaria/shaker': 3.0.0-beta.18
       '@linaria/utils': 3.0.0-beta.18
-      '@lucasols/vite-plugin-swc-react': 0.2.2
+      '@lucasols/vite-plugin-swc-react': 1.0.0
       '@types/react': ^18.0.15
       '@types/react-dom': ^18.0.6
       '@vitejs/plugin-react': ^1.3.2
@@ -49,7 +58,7 @@ importers:
       '@linaria/react': 3.0.0-beta.18_react@18.2.0
       '@linaria/shaker': 3.0.0-beta.18_@babel+core@7.18.9
       '@linaria/utils': 3.0.0-beta.18
-      '@lucasols/vite-plugin-swc-react': 0.2.2
+      '@lucasols/vite-plugin-swc-react': 1.0.0_vite@2.9.14
       '@types/react': 18.0.15
       '@types/react-dom': 18.0.6
       '@vitejs/plugin-react': 1.3.2
@@ -69,13 +78,14 @@ importers:
       '@linaria/react': 3.0.0-beta.18
       '@linaria/shaker': 3.0.0-beta.18
       '@linaria/utils': 3.0.0-beta.18
-      '@lucasols/vite-plugin-swc-react': 0.2.2
+      '@lucasols/vite-plugin-swc-react': 1.0.0
       '@playwright/test': ^1.24.2
       '@types/react': ^18.0.15
       '@types/react-dom': ^18.0.6
       '@vitejs/plugin-react': ^1.3.2
       react: ^18.2.0
       react-dom: ^18.2.0
+      tsm: ^2.2.2
       vite: ^2.9.14
       vite-plugin-inspect: ^0.5.1
       vite-plugin-linaria-persistent-dev-cache: workspace:../lib
@@ -88,13 +98,14 @@ importers:
       '@linaria/react': 3.0.0-beta.18_react@18.2.0
       '@linaria/shaker': 3.0.0-beta.18_@babel+core@7.18.9
       '@linaria/utils': 3.0.0-beta.18
-      '@lucasols/vite-plugin-swc-react': 0.2.2
+      '@lucasols/vite-plugin-swc-react': 1.0.0_vite@2.9.14
       '@playwright/test': 1.24.2
       '@types/react': 18.0.15
       '@types/react-dom': 18.0.6
       '@vitejs/plugin-react': 1.3.2
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      tsm: 2.2.2
       vite: 2.9.14
       vite-plugin-inspect: 0.5.1_vite@2.9.14
       vite-plugin-linaria-persistent-dev-cache: link:../lib
@@ -1428,66 +1439,35 @@ packages:
       '@babel/generator': 7.18.9
       '@babel/plugin-syntax-dynamic-import': 7.8.3_@babel+core@7.18.9
       '@babel/template': 7.18.6
-      '@linaria/core': 3.0.0-beta.22
-      '@linaria/logger': 3.0.0-beta.20
-      '@linaria/utils': 3.0.0-beta.20
+      '@linaria/core': 3.0.0-beta.18
+      '@linaria/logger': 3.0.0-beta.15
+      '@linaria/utils': 3.0.0-beta.18
       cosmiconfig: 5.2.1
       source-map: 0.7.3
       stylis: 3.5.4
     transitivePeerDependencies:
       - supports-color
-
-  /@linaria/babel-preset/3.0.0-beta.22:
-    resolution: {integrity: sha512-0Igie3stlsKT+XKYdhW7Yy8MNg2gZ5ShOosgTkpz3Agwtz+Osgb/4JNMnqGlAUaVULtMpKLc7mF/NbbhAEEF3Q==}
-    engines: {node: ^12.16.0 || >=13.7.0}
-    dependencies:
-      '@babel/core': 7.18.9
-      '@babel/generator': 7.18.9
-      '@babel/plugin-proposal-export-namespace-from': 7.18.9_@babel+core@7.18.9
-      '@babel/plugin-syntax-dynamic-import': 7.8.3_@babel+core@7.18.9
-      '@babel/plugin-transform-modules-commonjs': 7.18.6_@babel+core@7.18.9
-      '@babel/template': 7.18.6
-      '@babel/traverse': 7.18.9
-      '@linaria/core': 3.0.0-beta.22
-      '@linaria/logger': 3.0.0-beta.20
-      '@linaria/utils': 3.0.0-beta.20
-      cosmiconfig: 5.2.1
-      find-up: 5.0.0
-      source-map: 0.7.3
-      stylis: 3.5.4
-    transitivePeerDependencies:
-      - supports-color
-    dev: false
 
   /@linaria/core/3.0.0-beta.18:
     resolution: {integrity: sha512-uJON24tniQxszyfNu2wVu6I7d6fRudHVmNPuQic7iqL2LIYBuCaXv2vDmA6hfYI91cOvW6swGJ9m8QXA6qNlhg==}
     dependencies:
-      '@linaria/utils': 3.0.0-beta.20
-    dev: false
+      '@linaria/utils': 3.0.0-beta.18
 
-  /@linaria/core/3.0.0-beta.22:
-    resolution: {integrity: sha512-BPSecW8QmhQ0y+5cWXEja+MTmLsuo0T1PjqRlSWsmDgjJFFObqCnPEgbR1KNtQb3Msmx1/9q3dYKpA5Zk3g8KQ==}
-    engines: {node: ^12.16.0 || >=13.7.0}
-    dependencies:
-      '@linaria/logger': 3.0.0-beta.20
-      '@linaria/utils': 3.0.0-beta.20
-    transitivePeerDependencies:
-      - supports-color
-
-  /@linaria/logger/3.0.0-beta.20:
-    resolution: {integrity: sha512-wCxWnldCHf7HXdLG3QtbKyBur+z5V1qZTouSEvcVYDfd4aSRPOi/jLdwsZlsUq2PFGpA3jW6JnreZJ/vxuEl7g==}
-    engines: {node: ^12.16.0 || >=13.7.0}
+  /@linaria/logger/3.0.0-beta.15:
+    resolution: {integrity: sha512-tKytEEus47CZ4/7pbgRYD+Por4tH7/5Um2Quof6Qamd7Xj7brhmAPRRoZzYu4pht+S7V9oNL0X4IBSmNIOYRZw==}
     dependencies:
       debug: 4.3.4
       picocolors: 1.0.0
     transitivePeerDependencies:
       - supports-color
 
-  /@linaria/preeval/3.0.0-beta.22:
-    resolution: {integrity: sha512-/PS86ljXBu3HVLTRd2sn/5wxD4ywnlTUGZPMMFlZDGuBCHlMZehD7xE6VbX6t/JZtOAylU8vDi2RYum96evHAw==}
-    engines: {node: ^12.16.0 || >=13.7.0}
+  /@linaria/preeval/3.0.0-beta.18_@babel+core@7.18.9:
+    resolution: {integrity: sha512-GTqi0MhOFNh52o0sQ0DkdQPRTwKznavDjkKW0pSpA34r6/iDZLWIJpZwAYsyRcAG2bHPV8Xu/cFNxpSesJw13A==}
+    peerDependencies:
+      '@babel/core': '>=7'
     dependencies:
-      '@linaria/babel-preset': 3.0.0-beta.22
+      '@babel/core': 7.18.9
+      '@linaria/babel-preset': 3.0.0-beta.18_@babel+core@7.18.9
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -1498,10 +1478,8 @@ packages:
       react: '>=16'
     dependencies:
       '@emotion/is-prop-valid': 0.8.8
-      '@linaria/core': 3.0.0-beta.22
+      '@linaria/core': 3.0.0-beta.18
       react: 18.2.0
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /@linaria/shaker/3.0.0-beta.18_@babel+core@7.18.9:
@@ -1514,9 +1492,9 @@ packages:
       '@babel/plugin-transform-runtime': 7.18.9_@babel+core@7.18.9
       '@babel/plugin-transform-template-literals': 7.18.9_@babel+core@7.18.9
       '@babel/preset-env': 7.18.9_@babel+core@7.18.9
-      '@linaria/babel-preset': 3.0.0-beta.22
-      '@linaria/logger': 3.0.0-beta.20
-      '@linaria/preeval': 3.0.0-beta.22
+      '@linaria/babel-preset': 3.0.0-beta.18_@babel+core@7.18.9
+      '@linaria/logger': 3.0.0-beta.15
+      '@linaria/preeval': 3.0.0-beta.18_@babel+core@7.18.9
       babel-plugin-transform-react-remove-prop-types: 0.4.24
       ts-invariant: 0.9.4
     transitivePeerDependencies:
@@ -1525,17 +1503,15 @@ packages:
 
   /@linaria/utils/3.0.0-beta.18:
     resolution: {integrity: sha512-+NHxbvBzE3cMZe9b4leTxn+phOqHUNua9Y6NkLSFhWs6L0i2ovuE3HYSeY2fd6p5dFNbT3HbmZ/LjEqlJIFTKA==}
-    dev: false
 
-  /@linaria/utils/3.0.0-beta.20:
-    resolution: {integrity: sha512-SKRC9dBApzu0kTksVtGZ7eJz1vMu7xew/JEAjQj6XTQDblzWpTPyKQHBOGXNkqXjIB8PwAqWfvKzKapzaOwQaQ==}
-    engines: {node: ^12.16.0 || >=13.7.0}
-
-  /@lucasols/vite-plugin-swc-react/0.2.2:
-    resolution: {integrity: sha512-AVFLjhsdWsBG6T6nEyRRGGDcztlOsDlyo4xyix5quRzP1LEArzXgacH6xhs2aR2T6odnNmoI1WF+jPzjzh6JGg==}
+  /@lucasols/vite-plugin-swc-react/1.0.0_vite@2.9.14:
+    resolution: {integrity: sha512-loYa6wAA4RE4YuTxlMd+r8YlT7laiTjt7gMP9rRpUOd3TRHBM3HsbnzpxXpvn11USTVNqQ3A/hkvVx23qLLbOQ==}
+    peerDependencies:
+      vite: ^2.9.14
     dependencies:
       '@swc/core': 1.2.220
       magic-string: 0.26.2
+      vite: 2.9.14
     dev: false
 
   /@npmcli/fs/1.1.1:
@@ -2349,14 +2325,6 @@ packages:
     engines: {node: '>=0.10.0'}
     dev: false
 
-  /find-up/5.0.0:
-    resolution: {integrity: sha512-78/PXT1wlLLDgTzDs7sjq9hzz0vXD+zn+7wypEe4fXQxCmdmqfGsEPQxmiCSQI3ajFV91bVSsvNtrJRiW6nGng==}
-    engines: {node: '>=10'}
-    dependencies:
-      locate-path: 6.0.0
-      path-exists: 4.0.0
-    dev: false
-
   /fs-minipass/2.1.0:
     resolution: {integrity: sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==}
     engines: {node: '>= 8'}
@@ -2604,13 +2572,6 @@ packages:
     engines: {node: '>=14'}
     dev: true
 
-  /locate-path/6.0.0:
-    resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
-    engines: {node: '>=10'}
-    dependencies:
-      p-locate: 5.0.0
-    dev: false
-
   /lodash.debounce/4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
     dev: false
@@ -2853,20 +2814,6 @@ packages:
       wrappy: 1.0.2
     dev: true
 
-  /p-limit/3.1.0:
-    resolution: {integrity: sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ==}
-    engines: {node: '>=10'}
-    dependencies:
-      yocto-queue: 0.1.0
-    dev: false
-
-  /p-locate/5.0.0:
-    resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
-    engines: {node: '>=10'}
-    dependencies:
-      p-limit: 3.1.0
-    dev: false
-
   /p-map/4.0.0:
     resolution: {integrity: sha512-/bjOqmgETBYB5BoEeGVea8dmvHb2m9GLy1E9W43yeyfP6QQCZGFNa+XRceJEuDB6zqr+gKpIAmlLebMpykw/MQ==}
     engines: {node: '>=10'}
@@ -2880,11 +2827,6 @@ packages:
     dependencies:
       error-ex: 1.3.2
       json-parse-better-errors: 1.0.2
-
-  /path-exists/4.0.0:
-    resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
-    engines: {node: '>=8'}
-    dev: false
 
   /path-is-absolute/1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
@@ -3231,7 +3173,6 @@ packages:
     hasBin: true
     dependencies:
       esbuild: 0.14.31
-    dev: true
 
   /type-detect/4.0.8:
     resolution: {integrity: sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==}
@@ -3359,30 +3300,6 @@ packages:
     optionalDependencies:
       fsevents: 2.3.2
 
-  /vite/2.9.7:
-    resolution: {integrity: sha512-5hH7aNQe8rJiTTqCtPNX/6mIKlGw+1wg8UXwAxDIIN8XaSR+Zx3GT2zSu7QKa1vIaBqfUODGh3vpwY8r0AW/jw==}
-    engines: {node: '>=12.2.0'}
-    hasBin: true
-    peerDependencies:
-      less: '*'
-      sass: '*'
-      stylus: '*'
-    peerDependenciesMeta:
-      less:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-    dependencies:
-      esbuild: 0.14.31
-      postcss: 8.4.13
-      resolve: 1.22.0
-      rollup: 2.68.0
-    optionalDependencies:
-      fsevents: 2.3.2
-    dev: true
-
   /vitest/0.19.1_@vitest+ui@0.19.1:
     resolution: {integrity: sha512-E/ZXpFMUahn731wzhMBNzWRp4mGgiZFT0xdHa32cbNO0CSaHpE9hTfteEU247Gi2Dula8uXo5vvrNB6dtszmQA==}
     engines: {node: '>=v14.16.0'}
@@ -3457,8 +3374,3 @@ packages:
   /yallist/4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
     dev: true
-
-  /yocto-queue/0.1.0:
-    resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
-    engines: {node: '>=10'}
-    dev: false

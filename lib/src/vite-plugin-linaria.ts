@@ -29,7 +29,7 @@ type RollupPluginOptions = {
   debug?: boolean
 }
 
-export default function linaria({
+export function linaria({
   sourceMap,
   persistentCachePath = './node_modules/.linaria-cache/cache.json',
   disableDevPersistentCache,
@@ -56,7 +56,7 @@ export default function linaria({
   let resolvedAliases: Alias[] = []
 
   function getVirtualName(id: string) {
-    return `@linaria-css-cache/${slugify(id)}.css`
+    return `/@linaria-css-cache/${slugify(id)}.css`
   }
 
   type StatsMode = 'create' | 'cached' | 'skiped'
@@ -159,10 +159,6 @@ export default function linaria({
     },
     resolveId(importee: string) {
       if (virtualCssFiles.has(importee)) return importee
-
-      if (importee.startsWith('/linaria-css-cache/')) {
-        return importee.replace('/linaria-css-cache/', '@linaria-css-cache/')
-      }
 
       return
     },

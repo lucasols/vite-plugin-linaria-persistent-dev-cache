@@ -5,3 +5,5 @@ table.cpuprofile
 dist
 cache.json
 .DS_Store
+e2e-tests/tests-code
+e2e-tests/playwright-report
