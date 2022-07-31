@@ -1,15 +1,16 @@
-import { useState } from 'react'
 import reactLogo from './assets/react.svg'
+import { useState } from 'react'
 import './App.css'
 import { css } from '@linaria/core'
 import { styled } from '@linaria/react'
 
 const test = css`
-  color: yellow;
+  color: purple;
+  size: 25px;
 `
 
 const StyledTest = styled.div`
-  color: blue;
+  color: green;
 `
 
 function App() {
