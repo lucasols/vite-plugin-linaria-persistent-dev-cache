@@ -1,3 +1,4 @@
 packages:
   - 'app-test'
+  - 'e2e-tests'
   - 'lib'
