@@ -1,4 +1,4 @@
 packages:
-  - 'app-test'
+  - 'playground'
   - 'e2e-tests'
   - 'lib'
