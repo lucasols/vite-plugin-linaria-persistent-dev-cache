@@ -9,7 +9,7 @@
     "bench-file-dep-hash": "tsm ./test/benchs.ts",
     "build": "vitest run && pnpm --filter vite-plugin-linaria-persistent-dev-cache build",
     "build:watch": "pnpm --filter vite-plugin-linaria-persistent-dev-cache build:watch",
-    "npm-publish": "scripts/check-if-is-sync.sh && pnpm run build && pnpm --filter vite-plugin-linaria-persistent-dev-cache npm-publish"
+    "npm-publish": "scripts/check-if-is-sync.sh && pnpm build && pnpm test:e2e && pnpm --filter vite-plugin-linaria-persistent-dev-cache npm-publish"
   },
   "devDependencies": {
     "vite": "^2.9.14",
