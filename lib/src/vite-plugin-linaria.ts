@@ -56,7 +56,7 @@ export default function linaria({
   let resolvedAliases: Alias[] = []
 
   function getVirtualName(id: string) {
-    return `@linaria-css-cache/${slugify(id)}.css`
+    return `/@linaria-css-cache/${slugify(id)}.css`
   }
 
   type StatsMode = 'create' | 'cached' | 'skiped'
@@ -197,7 +197,7 @@ export default function linaria({
 
           logStats(startTime, 'cached', id, hash)
 
-          return cached
+          return { code: cached.code, map: cached.map }
         }
       }
 

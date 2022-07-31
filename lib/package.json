@@ -1,0 +1,28 @@
+{
+  "name": "vite-plugin-linaria-persistent-dev-cache",
+  "version": "1.2.0",
+  "license": "MIT",
+  "scripts": {
+    "build:watch": "tsc -w -p tsconfig.prod.json",
+    "build": "tsc -p tsconfig.prod.json",
+    "npm-publish": "npm publish"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": "github:lucaslos/vite-plugin-linaria-persistent-dev-cache",
+  "author": "Lucas Santos",
+  "main": "./dist/vite-plugin-linaria.js",
+  "types": "./dist/vite-plugin-linaria.d.ts",
+  "engines": {
+    "node": ">=14.6.0"
+  },
+  "devDependencies": {
+    "@linaria/babel-preset": "3.0.0-beta.18",
+    "vite": "^2.9.14"
+  },
+  "peerDependencies": {
+    "@linaria/babel-preset": "3.0.0-beta.18",
+    "vite": "^2.9.14"
+  }
+}

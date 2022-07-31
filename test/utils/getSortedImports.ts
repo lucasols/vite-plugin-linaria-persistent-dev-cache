@@ -1,6 +1,6 @@
 import { getResolvedCache } from '../dfs/deepFirstSearch'
-import { FileDepHashInstance, testOnly } from '../../src/fileDepHash'
-import { sortBy } from '../../src/utils'
+import { FileDepHashInstance, testOnly } from '../../lib/src/fileDepHash'
+import { sortBy } from '../../lib/src/utils'
 
 export function getSortedImports(
   imports: { fileId: string }[],

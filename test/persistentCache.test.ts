@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { createPersistentCache } from '../src/persistentCache'
+import { createPersistentCache } from '../lib/src/persistentCache'
 import { matchValuePattern, valuePatterns } from './utils/matchValuePattern'
 import { sleep } from './utils/testUtils'
 

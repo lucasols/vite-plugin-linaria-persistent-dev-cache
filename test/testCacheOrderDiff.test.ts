@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest'
-import { sortBy } from '../src/utils'
+import { sortBy } from '../lib/src/utils'
 import { getSortedCodeDepsCache } from './utils/getSortedImports'
 import { createFileDeepHashInstance, getFileDepHash } from './utils/setup'
 import { order1, order2 } from './__mocks__/renderOrders'

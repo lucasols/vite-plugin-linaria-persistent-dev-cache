@@ -1,0 +1,40 @@
+{
+  "name": "app-test",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build-app": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@babel/preset-react": "^7.18.6",
+    "@babel/preset-typescript": "^7.18.6",
+    "@linaria/babel-preset": "3.0.0-beta.18",
+    "@linaria/core": "3.0.0-beta.18",
+    "@linaria/react": "3.0.0-beta.18",
+    "@linaria/shaker": "3.0.0-beta.18",
+    "@linaria/utils": "3.0.0-beta.18",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite-plugin-linaria-persistent-dev-cache": "workspace:../lib",
+    "@lucasols/vite-plugin-swc-react": "0.2.2",
+    "@types/react": "^18.0.15",
+    "@types/react-dom": "^18.0.6",
+    "@vitejs/plugin-react": "^1.3.2",
+    "vite": "^2.9.14",
+    "vite-plugin-inspect": "^0.5.1",
+    "vite-plugin-swc-react": "^0.1.12"
+  },
+  "pnpm": {
+    "overrides": {
+      "@linaria/core": "3.0.0-beta.18",
+      "@linaria/react": "3.0.0-beta.18",
+      "@linaria/shaker": "3.0.0-beta.18",
+      "@linaria/babel-preset": "3.0.0-beta.18",
+      "@linaria/preeval": "3.0.0-beta.18",
+      "@linaria/utils": "3.0.0-beta.18",
+      "@linaria/logger": "3.0.0-beta.15"
+    }
+  }
+}
