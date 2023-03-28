@@ -251,6 +251,7 @@ export function createPersistentCache({
     const previousFileHash = persistentCache.fileHashes[fileIdCompressed]
 
     if (previousFileHash) {
+      // FIX: bug aqui! não exclui o hash antigo
       debugLog('delete previous', fileIdCompressed)
       delete persistentCache.results[previousFileHash]
     }

@@ -16,6 +16,9 @@ export default defineConfig({
     // reactBabel(),
     Inspect(),
   ],
+  resolve: {
+    alias: [{ find: '@components', replacement: '/src/components' }],
+  },
   build: {
     sourcemap: true,
   },

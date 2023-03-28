@@ -473,3 +473,5 @@ test('write debounce', async () => {
 
   expect(writeFile).toHaveBeenCalledTimes(2)
 })
+
+test.todo('moving a file to another folder should not crash the cache', async () => {}) // não sei se é isso mesmo haha, é issso sim!! mas o problema é no plugin

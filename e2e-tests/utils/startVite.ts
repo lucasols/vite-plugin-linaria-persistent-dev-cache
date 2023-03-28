@@ -1,7 +1,7 @@
-import { react } from '@lucasols/vite-plugin-swc-react'
 import { cpSync, existsSync, readFileSync, rmSync } from 'node:fs'
 import path from 'path'
 import { createServer } from 'vite'
+import react from '@vitejs/plugin-react-swc'
 import { linaria } from 'vite-plugin-linaria-persistent-dev-cache'
 
 export async function startVite(testName: string) {

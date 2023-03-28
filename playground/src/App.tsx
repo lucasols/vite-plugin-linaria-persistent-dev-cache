@@ -3,10 +3,11 @@ import { useState } from 'react'
 import './App.css'
 import { css } from '@linaria/core'
 import { styled } from '@linaria/react'
+import { Test } from '@components/test/Test'
 
 const test = css`
   color: purple;
-  size: 25px;
+  font-size: 25px;
 `
 
 const StyledTest = styled.div`
@@ -36,6 +37,8 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
+
+        <Test />
 
         <button
           onClick={() => {
