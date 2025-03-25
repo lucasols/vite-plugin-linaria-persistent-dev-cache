@@ -19,10 +19,10 @@
   },
   "devDependencies": {
     "@linaria/babel-preset": "3.0.0-beta.18",
-    "vite": "^4.2.1"
+    "vite": "^2.9.14"
   },
   "peerDependencies": {
     "@linaria/babel-preset": "3.0.0-beta.18",
-    "vite": "^4.2.1"
+    "vite": "^2.9.14"
   }
 }
