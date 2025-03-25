@@ -128,6 +128,7 @@ export function linaria({
 
   return {
     name: 'linaria',
+    enforce: 'pre',
     configResolved(resolvedConfig) {
       config = resolvedConfig
 
